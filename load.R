@@ -7,18 +7,17 @@ require(xts)
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
 
-covidStats <- function( dates, tvals )
+covidStats <- function( total )
 {
-  if( NROW( dates ) != NROW( tvals ) || NCOL( dates ) + NCOL( tvals ) != 2 )
+  if( NCOL( total ) != 1 )
     simpleError( "covidStats: Invalid data")
   
-  total <- xts( tvals, dates )
-  day <- c( ifelse( tvals[ 1 ] == 0, 0, NA ), diff( tvals ) )
+  day <- c( ifelse( total[ 1 ] == 0, 0, NA ), diff( total ) )
   day_m7 <- frollmean( day, 7 )
   day_m15 <- frollmean( day, 15 )
-  growth_l7 <- growthRate( day, tvals, 7 )
-  growth_l15 <- growthRate( day, tvals, 15 )
-  cbind.xts( total, day, day_m7, day_m15, growth_l7, growth_l15 )
+  growth_l7 <- growthRate( day, total, 7 )
+  growth_l15 <- growthRate( day, total, 15 )
+  cbind( total, day, day_m7, day_m15, growth_l7, growth_l15 )
 }
 
 growthRate <- function( daily, total, period )
