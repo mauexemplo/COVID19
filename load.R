@@ -9,18 +9,23 @@ dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
 
 covidStats <- function( total )
 {
+  if( is.xts( total ) )
+    total <- coredata( total )
   if( NCOL( total ) != 1 )
     simpleError( "covidStats: Invalid data")
   
+  total_l <- log1p( total )
   day <- c( ifelse( total[ 1 ] == 0, 0, NA ), diff( total ) )
   day_m7 <- frollmean( day, 7 )
   day_m15 <- frollmean( day, 15 )
+  day_s7 <- frollsum( day, 7 )
+  day_sl7 <- log1p( day_s7 )
   growth_l7 <- growthRate( day, total, 7 )
   growth_l15 <- growthRate( day, total, 15 )
-  cbind( total, day, day_m7, day_m15, growth_l7, growth_l15 )
+  cbind( total, total_l, day, day_m7, day_m15, day_s7, day_sl7, growth_l7, growth_l15 )
 }
 
-growthRate <- function( daily, total, period )
+growthRate <- function( daily, total, period = 7L )
 {
   sl <- log1p( frollsum( daily, period ) )
   tl <- log1p( total )
@@ -45,4 +50,4 @@ tsdBRStD <- xts( dBRStD[ , -1 ], dBRStD[ , 1 ][[ 1 ]] )
 # tsPRD <- cbind.xts( tsPRD, rollmeanr( tsPRD$PR.1, 7 ) )
 # tsPRD <- cbind.xts( tsPRD, rollmeanr( tsPRD$PR.1, 15 ) )
 # colnames( tsPRD ) <- c( "total", "day", "day_m7", "day_m15" )
-tsPRD <- covidStats( index( tsdBRStD ), tsdBRStD$PR )
+# tsPRD <- covidStats( index( tsdBRStD ), tsdBRStD$PR )
