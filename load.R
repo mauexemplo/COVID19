@@ -49,8 +49,7 @@ dBRStD <- pivot_wider( dBRStates[ , c(1,7,8) ], names_from = state, values_from 
 dBRStD <- dBRStD[ rowSums( dBRStD[ , -1 ] ) != 0, ]
 tsdBRStD <- xts( dBRStD[ , -1 ], dBRStD[ , 1 ][[ 1 ]] )
 
-# tsPRD <- cbind.xts( tsBRStD$PR, tsdBRStD$PR )
-# tsPRD <- cbind.xts( tsPRD, rollmeanr( tsPRD$PR.1, 7 ) )
-# tsPRD <- cbind.xts( tsPRD, rollmeanr( tsPRD$PR.1, 15 ) )
-# colnames( tsPRD ) <- c( "total", "day", "day_m7", "day_m15" )
-# tsPRD <- covidStats( index( tsdBRStD ), tsdBRStD$PR )
+tsPRD <- xts( covidStats( tsBRStD$PR ), index( tsBRStD ) )
+tsSPD <- xts( covidStats( tsBRStD$SP ), index( tsBRStD ) )
+tsRJD <- xts( covidStats( tsBRStD$RJ ), index( tsBRStD ) )
+tsBRD <- xts( covidStats( rowSums( BRStD[ , -1 ] ) ), BRStD[ ,1 ][[ 1 ]] )
