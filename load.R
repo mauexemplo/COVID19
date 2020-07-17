@@ -3,6 +3,7 @@ require(curl)
 require(lubridate)
 require(tidyr)
 require(xts)
+require(ggplot2)
 
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
@@ -49,7 +50,7 @@ dBRStD <- pivot_wider( dBRStates[ , c(1,7,8) ], names_from = state, values_from 
 dBRStD <- dBRStD[ rowSums( dBRStD[ , -1 ] ) != 0, ]
 tsdBRStD <- xts( dBRStD[ , -1 ], dBRStD[ , 1 ][[ 1 ]] )
 
-tsPRD <- xts( covidStats( tsBRStD$PR ), index( tsBRStD ) )
-tsSPD <- xts( covidStats( tsBRStD$SP ), index( tsBRStD ) )
-tsRJD <- xts( covidStats( tsBRStD$RJ ), index( tsBRStD ) )
-tsBRD <- xts( covidStats( rowSums( BRStD[ , -1 ] ) ), BRStD[ ,1 ][[ 1 ]] )
+csPRD <- xts( covidStats( tsBRStD$PR ), index( tsBRStD ) )
+csSPD <- xts( covidStats( tsBRStD$SP ), index( tsBRStD ) )
+csRJD <- xts( covidStats( tsBRStD$RJ ), index( tsBRStD ) )
+csBRD <- xts( covidStats( rowSums( BRStD[ , -1 ] ) ), BRStD[ ,1 ][[ 1 ]] )
