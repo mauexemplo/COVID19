@@ -22,7 +22,10 @@ covidStats <- function( total )
   day_sl7 <- log1p( day_s7 )
   growth_l7 <- growthRate( day, total, 7 )
   growth_l15 <- growthRate( day, total, 15 )
-  cbind( total, total_l, day, day_m7, day_m15, day_s7, day_sl7, growth_l7, growth_l15 )
+
+  result <- cbind( total, total_l, day, day_m7, day_m15, day_s7, day_sl7, growth_l7, growth_l15 )
+  colnames( result ) <- c( "total", "total_l", "day", "day_m7", "day_m15", "day_s7", "day_sl7", "growth_l7", "growth_l15" )
+  result
 }
 
 growthRate <- function( daily, total, period = 7L )
