@@ -1,6 +1,6 @@
 require( ggplot2 )
 
-if( !exists( "csBRD" ) )
+if( !exists("dBrazil") || max(dBrazil$date) != Sys.Date() )
   source( "load.R" )
 
 ggplot( csPRD, mapping = aes( total_l, day_sl7 ) ) +

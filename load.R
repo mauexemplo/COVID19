@@ -3,7 +3,6 @@ require(curl)
 require(lubridate)
 require(tidyr)
 require(xts)
-require(ggplot2)
 
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
@@ -36,8 +35,13 @@ growthRate <- function( daily, total, period = 7L )
   ( sl - shift( sl, period ) ) / ( tl - shift( tl, period ) )
 }
 
-dGlobal <- fread( dGlobalUrl )
-dBrazil <- fread( dBrazilUrl, encoding = "UTF-8" )
+load_BrasilIo <- function( url = dBrazilUrl )
+{ fread( url, encoding = "UTF-8" ) }
+
+load_JHUGSSEGlobal <- function( url = dGlobalUrl )
+{ fread( url ) }
+
+dBrazil <- load_BrasilIo()
 
 dBRStates <- dBrazil[ dBrazil$place_type == "state", -c(1,2,6,7,8,9,10,14,16) ]
 dBRStates$date <- ymd( dBRStates$date )
