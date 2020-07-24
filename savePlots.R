@@ -1,8 +1,18 @@
 require( ggplot2 )
+require( xts )
 
-if( !exists("dBrazil") || max(dBrazil$date) != Sys.Date() )
+if ( !exists("csPRD") || !exists("csSPD") || !exists("csRJD") || !exists("csBRD") )
+{
   source( "load.R" )
-
+} else {
+  require( xts )
+  if ( end( csBRD ) != Sys.Date() )
+  {
+    rm( list = ls() )
+    source( "load.R" )
+  }
+}
+  
 ggplot( csPRD, mapping = aes( total_l, day_sl7 ) ) +
   geom_point() +
   geom_smooth( span = 0.5 ) +

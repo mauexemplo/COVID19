@@ -6,6 +6,8 @@ require(xts)
 
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
+cities <- c( "São Paulo", "Rio de Janeiro", "Curitiba", "Brasília" )
+states <- c( "SP", "RJ", "PR", "DF" )
 
 covidStats <- function( total )
 {
