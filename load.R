@@ -3,6 +3,7 @@ require(curl)
 require(lubridate)
 require(tidyr)
 require(xts)
+require(dplyr)
 
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
@@ -45,18 +46,28 @@ load_JHUGSSEGlobal <- function( url = dGlobalUrl )
 
 dBrazil <- load_BrasilIo()
 
-dBRStates <- dBrazil[ dBrazil$place_type == "state", -c(1,2,6,7,8,9,10,14,16) ]
-dBRStates$date <- ymd( dBRStates$date )
+BRStD <- dBrazil %>%
+  filter( last_available_deaths > 0, place_type == "state" ) %>%
+  select( date, state, last_available_deaths ) %>%
+  pivot_wider( names_from = state,
+               values_from = last_available_deaths,
+               values_fill = 0 )
+tsBRStD <-
+  xts( select( BRStD, sort( colnames( BRStD ) ), -date ),
+       ymd( BRStD$date ) )
 
-BRStD <- pivot_wider( dBRStates[ , c(1,5,7) ], names_from = state, values_from = last_available_deaths, values_fill = 0 )
-BRStD <- BRStD[ rowSums( BRStD[ , -1 ] ) != 0, ]
-tsBRStD <- xts( BRStD[ , -1 ], BRStD[ , 1 ][[ 1 ]] )
+# dBRStates <- dBrazil[ dBrazil$place_type == "state", -c(1,2,6,7,8,9,10,14,16) ]
+# dBRStates$date <- ymd( dBRStates$date )
 
-dBRStD <- pivot_wider( dBRStates[ , c(1,7,8) ], names_from = state, values_from = new_deaths, values_fill = 0 )
-dBRStD <- dBRStD[ rowSums( dBRStD[ , -1 ] ) != 0, ]
-tsdBRStD <- xts( dBRStD[ , -1 ], dBRStD[ , 1 ][[ 1 ]] )
+# BRStD <- pivot_wider( dBRStates[ , c(1,5,7) ], names_from = state, values_from = last_available_deaths, values_fill = 0 )
+# BRStD <- BRStD[ rowSums( BRStD[ , -1 ] ) != 0, ]
+# tsBRStD <- xts( BRStD[ , -1 ], BRStD[ , 1 ][[ 1 ]] )
+
+# dBRStD <- pivot_wider( dBRStates[ , c(1,7,8) ], names_from = state, values_from = new_deaths, values_fill = 0 )
+# dBRStD <- dBRStD[ rowSums( dBRStD[ , -1 ] ) != 0, ]
+# tsdBRStD <- xts( dBRStD[ , -1 ], dBRStD[ , 1 ][[ 1 ]] )
 
 csPRD <- xts( covidStats( tsBRStD$PR ), index( tsBRStD ) )
 csSPD <- xts( covidStats( tsBRStD$SP ), index( tsBRStD ) )
 csRJD <- xts( covidStats( tsBRStD$RJ ), index( tsBRStD ) )
-csBRD <- xts( covidStats( rowSums( BRStD[ , -1 ] ) ), BRStD[ ,1 ][[ 1 ]] )
+csBRD <- xts( covidStats( rowSums( BRStD[ , -1 ] ) ), ymd( BRStD$date ) )
