@@ -8,7 +8,7 @@ require(dplyr)
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
 cities <- c( "São Paulo", "Rio de Janeiro", "Curitiba", "Brasília" )
-states <- c( "SP", "RJ", "PR", "DF" )
+states <- c( "SP", "RJ", "PR", "DF", "BR" )
 
 covidStats <- function( total )
 {
@@ -52,6 +52,22 @@ BRStD <- dBrazil %>%
   pivot_wider( names_from = state,
                values_from = last_available_deaths,
                values_fill = 0 )
+
+BRStateStats <- dBrazil %>% 
+  rename( total = last_available_deaths ) %>% 
+  filter( total > 0, place_type == "state" ) %>%
+  select( date, state, total ) %>%
+  bind_rows( group_by( ., date ) %>% 
+               summarise( state = "BR", total = sum( total ) ) ) %>% 
+  arrange( state, date ) %>% 
+  group_by( state ) %>% 
+  mutate( day = total - lag( total, default = 0 ),
+          week = frollsum( day, 7 ),
+          week_m = frollmean( day, 7 ),
+          week_l = log1p( week ),
+          total_l = log1p( total ) ) %>% 
+  ungroup()
+
 tsBRStD <-
   xts( select( BRStD, sort( colnames( BRStD ) ), -date ),
        ymd( BRStD$date ) )
