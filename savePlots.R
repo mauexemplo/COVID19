@@ -18,48 +18,56 @@ ggplot( csPRD, mapping = aes( total_l, day_sl7 ) ) +
   geom_smooth( span = 0.5 ) +
   labs( title = "PR - Óbitos, Taxa de crescimento 7d")
 ggsave( file.path( "plots", "pr_gl7.png" ) )
+ggsave( file.path( "plots", "pr_gl7.svg" ) )
 
 ggplot( csPRD, mapping = aes( Index, day_m7 ) ) +
   geom_point() +
   geom_smooth( span = 0.5 ) +
   labs( title = "PR - Óbitos, Média móvel 7d")
 ggsave( file.path( "plots", "pr_m7.png" ) )
+ggsave( file.path( "plots", "pr_m7.svg" ) )
 
 ggplot( csSPD, mapping = aes( total_l, day_sl7 ) ) +
   geom_point() +
   geom_smooth( span = 0.5 ) +
   labs( title = "SP - Óbitos, Taxa de crescimento 7d")
 ggsave( file.path( "plots", "sp_gl7.png" ) )
+ggsave( file.path( "plots", "sp_gl7.svg" ) )
 
 ggplot( csSPD, mapping = aes( Index, day_m7 ) ) +
   geom_point() +
   geom_smooth( span = 0.5 ) +
   labs( title = "SP - Óbitos, Média móvel 7d")
 ggsave( file.path( "plots", "sp_m7.png" ) )
+ggsave( file.path( "plots", "sp_m7.svg" ) )
 
 ggplot( csRJD, mapping = aes( total_l, day_sl7 ) ) +
   geom_point() +
   geom_smooth( span = 0.5 ) +
   labs( title = "RJ - Óbitos, Taxa de crescimento 7d")
 ggsave( file.path( "plots", "rj_gl7.png" ) )
+ggsave( file.path( "plots", "rj_gl7.svg" ) )
 
 ggplot( csRJD, mapping = aes( Index, day_m7 ) ) +
   geom_point() +
   geom_smooth( span = 0.5 ) +
   labs( title = "RJ - Óbitos, Média móvel 7d")
 ggsave( file.path( "plots", "rj_m7.png" ) )
+ggsave( file.path( "plots", "rj_m7.svg" ) )
 
 ggplot( csBRD, mapping = aes( total_l, day_sl7 ) ) +
   geom_point() +
   geom_smooth( span = 0.5 ) +
   labs( title = "Nacional - Óbitos, Taxa de crescimento 7d")
 ggsave( file.path( "plots", "br_gl7.png" ) )
+ggsave( file.path( "plots", "br_gl7.svg" ) )
 
 ggplot( csBRD, mapping = aes( Index, day_m7 ) ) +
   geom_point() +
   geom_smooth( span = 0.5 ) +
   labs( title = "Nacional - Óbitos, Média móvel 7d")
 ggsave( file.path( "plots", "br_m7.png" ) )
+ggsave( file.path( "plots", "br_m7.svg" ) )
 
 BRStateStats %>%
   filter( total >= 10, state %in% states ) %>%
@@ -73,6 +81,7 @@ BRStateStats %>%
   labs( title = "Estados Selecionados - Taxa de crescimento de óbitos",
         caption = "Fonte: Brasil.IO" )
 ggsave( file.path( "plots", "states_gl7.png" ) )
+ggsave( file.path( "plots", "states_gl7.svg" ) )
 
 BRCityStats %>%
   filter( total >= 10, city_ibge_code %in% cities$city_ibge_code ) %>%
@@ -86,3 +95,4 @@ BRCityStats %>%
   labs( title = "Capitais Selecionadas - Taxa de crescimento de óbitos",
         caption = "Fonte: Brasil.IO" )
 ggsave( file.path( "plots", "cities_gl7.png" ) )
+ggsave( file.path( "plots", "cities_gl7.svg" ) )
