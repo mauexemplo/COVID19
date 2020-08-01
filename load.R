@@ -7,7 +7,13 @@ require(dplyr)
 
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
-cities <- c( "São Paulo", "Rio de Janeiro", "Curitiba", "Brasília" )
+cities <- list( city = c( "Belo Horizonte", "Brasília", "Curitiba",
+                          "Fortaleza", "Goiânia", "Manaus", "Recife",
+                          "Rio de Janeiro", "Salvador", "São Paulo" ),
+                city_ibge_code = c( 3106200L, 5300108L, 4106902L, 2304400L,
+                                    5208707L, 1302603L, 2611606L, 3304557L,
+                                    2927408L, 3550308L )
+)
 states <- c( "SP", "RJ", "PR", "DF", "BR" )
 
 covidStats <- function( total )
@@ -63,25 +69,36 @@ BRStateStats <- dBrazil %>%
   group_by( state ) %>% 
   mutate( day = total - lag( total, default = 0 ),
           week = frollsum( day, 7 ),
-          week_m = frollmean( day, 7 ),
+          day_m7 = frollmean( day, 7 ),
           week_l = log1p( week ),
           total_l = log1p( total ) ) %>% 
   ungroup()
 
-tsBRStD <-
-  xts( select( BRStD, sort( colnames( BRStD ) ), -date ),
-       ymd( BRStD$date ) )
+BRCityStats <- dBrazil %>% 
+  rename( total = last_available_deaths ) %>% 
+  filter( total > 0, place_type == "city" ) %>%
+  select( date, city, city_ibge_code, state, total ) %>%
+  arrange( city_ibge_code, date ) %>% 
+  group_by( city_ibge_code, state ) %>% 
+  mutate( day = total - lag( total, default = 0 ),
+          week = frollsum( day, 7 ),
+          day_m7 = frollmean( day, 7 ),
+          week_l = log1p( week ),
+          total_l = log1p( total ) ) %>% 
+  ungroup()
 
-# dBRStates <- dBrazil[ dBrazil$place_type == "state", -c(1,2,6,7,8,9,10,14,16) ]
-# dBRStates$date <- ymd( dBRStates$date )
+todayStates <- BRStateStats %>%
+  mutate( growth_l7 = ( week_l - shift( week_l, 7 ) ) /
+            ( total_l - shift( total_l, 7 ) ) ) %>%
+  filter( date == today() ) %>% arrange( desc( growth_l7 ) )
 
-# BRStD <- pivot_wider( dBRStates[ , c(1,5,7) ], names_from = state, values_from = last_available_deaths, values_fill = 0 )
-# BRStD <- BRStD[ rowSums( BRStD[ , -1 ] ) != 0, ]
-# tsBRStD <- xts( BRStD[ , -1 ], BRStD[ , 1 ][[ 1 ]] )
+todayCities <- BRCityStats %>%
+  mutate( growth_l7 = ( week_l - shift( week_l, 7 ) ) /
+            ( total_l - shift( total_l, 7 ) ) ) %>%
+  filter( date == today() ) %>% arrange( desc( growth_l7 ) )
 
-# dBRStD <- pivot_wider( dBRStates[ , c(1,7,8) ], names_from = state, values_from = new_deaths, values_fill = 0 )
-# dBRStD <- dBRStD[ rowSums( dBRStD[ , -1 ] ) != 0, ]
-# tsdBRStD <- xts( dBRStD[ , -1 ], dBRStD[ , 1 ][[ 1 ]] )
+tsBRStD <- xts( select( BRStD, sort( colnames( BRStD ) ), -date ),
+                ymd( BRStD$date ) )
 
 csPRD <- xts( covidStats( tsBRStD$PR ), index( tsBRStD ) )
 csSPD <- xts( covidStats( tsBRStD$SP ), index( tsBRStD ) )

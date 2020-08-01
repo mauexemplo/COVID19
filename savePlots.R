@@ -65,10 +65,24 @@ BRStateStats %>%
   filter( total >= 10, state %in% states ) %>%
   ggplot( mapping = aes( x = total, y = week, color = state ) ) +
   geom_line() +
-  geom_smooth() +
-  scale_x_log10() +
-  scale_y_log10() +
-  labs( x = "Total (log)", y = "Acumulado 7 dias (log)",
-        title = "Estados Selecionados - Taxa de crescimento de óbitos",
+  geom_smooth( span = 0.5 ) +
+  scale_x_log10( "Total (log)", breaks = c( 10, 100, 1000, 10000, 100000 ),
+                 labels = c( "10", "100", "1k", "10k", "100k" ) ) +
+  scale_y_log10( "Acumulado 7 dias (log)", breaks = c( 10, 100, 1000, 10000, 100000 ),
+                 labels = c( "10", "100", "1k", "10k", "100k" ) ) +
+  labs( title = "Estados Selecionados - Taxa de crescimento de óbitos",
         caption = "Fonte: Brasil.IO" )
 ggsave( file.path( "plots", "states_gl7.png" ) )
+
+BRCityStats %>%
+  filter( total >= 10, city_ibge_code %in% cities$city_ibge_code ) %>%
+  ggplot( mapping = aes( x = total, y = week, color = city ) ) +
+  geom_line() +
+  geom_smooth( span = 0.5 ) +
+  scale_x_log10( "Total (log)", breaks = c( 10, 50, 200, 1000, 5000, 10000 ),
+                 labels = c( "10", "50", "200", "1k", "5k", "10k" ) ) +
+  scale_y_log10( "Acumulado 7 dias (log)", breaks = c( 10, 50, 200, 500, 1000 ),
+                 labels = c( "10", "50", "200", "500", "1k" ) ) +
+  labs( title = "Capitais Selecionadas - Taxa de crescimento de óbitos",
+        caption = "Fonte: Brasil.IO" )
+ggsave( file.path( "plots", "cities_gl7.png" ) )

@@ -1,0 +1,1 @@
+![Estados - Crescimento](plots/states_gl7.png "Estados Selecionados - Crescimento")
