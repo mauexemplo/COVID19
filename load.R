@@ -1,8 +1,8 @@
-require(data.table)
-require(curl)
-require(lubridate)
-require(tidyr)
-require(dplyr)
+require( data.table )
+require( curl )
+require( lubridate )
+require( tidyr )
+require( dplyr )
 
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
@@ -48,6 +48,38 @@ load_BrasilIo <- function( url = dBrazilUrl )
 
 load_JHUGSSEGlobal <- function( url = dGlobalUrl )
 { fread( url ) }
+
+load_homePRSaude <- function( url = PRSaudeUrl )
+{
+  require( rvest )
+  read_html( PRSaudeUrl, encoding = "UTF-8" )
+}
+
+load_PRGeral <- function( home = load_homePRSaude(), date = today() )
+{
+  # TODO: Add date filter
+  
+  res <- home %>%
+    html_nodes( xpath = "//a[text()='Geral.csv']" ) %>%
+    html_attr( "href" )
+  fread( res[ 1 ], encoding = "UTF-8" )
+}
+
+load_PRCasos <- function( home = load_homePRSaude(), date = today() )
+{
+  # TODO: Add date filter
+  
+  res <- home %>%
+    html_nodes( xpath = "//a[contains(.,'Casos e ')]" ) %>%
+    html_attr( "href" )
+  fread( res[ 1 ], encoding = "UTF-8" )
+}
+
+parse_PRCasos <- function( data, date = today() )
+{
+  data %>% mutate( date = date ) %>%
+    select( date, location = Municipio, deaths = Obito )
+}
 
 dBrazil <- load_BrasilIo()
 
