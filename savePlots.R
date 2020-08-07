@@ -88,6 +88,7 @@ multiCities_gl7 <- BRCityStats %>%
   scale_y_log10( "Acumulado 7 dias (log)",
                  breaks = c( 10, 50, 200, 500, 1000 ),
                  labels = c( "10", "50", "200", "500", "1k" ) ) +
+  scale_color_discrete( labels = cities$city )
   labs( title = "Capitais Selecionadas - Taxa de crescimento de óbitos",
         caption = "Fonte: Brasil.IO", color = NULL )
 

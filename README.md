@@ -1,7 +1,7 @@
 # Gráficos sobre a pandemia de COVID-19 no Brasil
 Atualizados diariamente, se tudo correr bem :smile:
 
-## 1 - Nacional e Estados Selecionados, Índice de Crescimento de Óbitos
+## 1 - Estados Selecionados, Índice de Crescimento de Óbitos
 ![Nacional e Estados - Índice de Crescimento de Óbitos](plots/states_gl7.svg "Nacional e Estados - Índice de Crescimento de Óbitos")
 
 ## 2 - Capitais Selecionadas, Índice de Crescimento de Óbitos
@@ -20,14 +20,14 @@ Atualizados diariamente, se tudo correr bem :smile:
 ![Paraná - Índice de Crescimento](plots/PR_gl7.svg "Paraná - Índice de Crescimento")
 
 ## 5 - Cidades Selecionadas, Crescimento e Média
-![São Paulo - Índice de Crescimento]("plots/3550308_gl7.svg")
-![Rio de Janeiro - Índice de Crescimento]("plots/3304557_gl7.svg")
-![Belo Horizonte - Índice de Crescimento]("plots/3106200_gl7.svg")
-![Brasília - Índice de Crescimento]("plots/5300108_gl7.svg")
-![Curitiba - Índice de Crescimento]("plots/4106902_gl7.svg")
+![São Paulo - Índice de Crescimento](plots/3550308_gl7.svg)
+![Rio de Janeiro - Índice de Crescimento](plots/3304557_gl7.svg)
+![Belo Horizonte - Índice de Crescimento](plots/3106200_gl7.svg)
+![Brasília - Índice de Crescimento](plots/5300108_gl7.svg)
+![Curitiba - Índice de Crescimento](plots/4106902_gl7.svg)
 
-![São Paulo - Média Móvel]("plots/3550308_m7.svg")
-![Rio de Janeiro - Média Móvel]("plots/3304557_m7.svg")
-![Belo Horizonte - Média Móvel]("plots/3106200_m7.svg")
-![Brasília - Média Móvel]("plots/5300108_m7.svg")
-![Curitiba - Média Móvel]("plots/4106902_m7.svg")
+![São Paulo - Média Móvel](plots/3550308_m7.svg)
+![Rio de Janeiro - Média Móvel](plots/3304557_m7.svg)
+![Belo Horizonte - Média Móvel](plots/3106200_m7.svg)
+![Brasília - Média Móvel](plots/5300108_m7.svg)
+![Curitiba - Média Móvel](plots/4106902_m7.svg)
