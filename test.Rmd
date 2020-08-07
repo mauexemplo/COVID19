@@ -1,0 +1,70 @@
+---
+title: "README"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+require( lubridate )
+
+knitr::opts_chunk$set( echo = TRUE )
+
+if ( !exists( "multiCities_gl7" ) ||
+     !exists( "BRStats" ) ||
+     today() - max( BRStats$date ) > days( 1 ) )
+{
+  source( "savePlots.R" )
+}
+```
+# Gráficos sobre a pandemia de COVID-19 no Brasil
+Atualizados diariamente, se tudo correr bem :smile:
+
+## 1 - Estados Selecionados, Índice de Crescimento de Óbitos
+```{r multistates_plot, echo=FALSE, message=FALSE, warning=FALSE}
+multiStates_gl7
+```
+
+## 2 - Capitais Selecionadas, Índice de Crescimento de Óbitos
+```{r multicities_plot, echo=FALSE, message=FALSE, warning=FALSE}
+multiCities_gl7
+```
+
+## 3 - Nacional
+```{r brasil_plots, echo=FALSE, message=FALSE, warning=FALSE}
+sumStates_gl7
+sumStates_m7
+```
+
+## 4 - Estados Selecionados, Índices de Crescimento de Óbitos
+```{r states_plot, echo=FALSE, message=FALSE, warning=FALSE}
+state_gl7s
+```
+
+## 5 - Capitais Selecionadas, Índices de Crescimento de Óbitos
+```{r cities_plot, echo=FALSE, message=FALSE, warning=FALSE}
+# city_gl7s
+for( i in seq_along( city_gl7s ) )
+  { city_gl7s[[ i ]] }
+```
+
+
+## GitHub Documents
+
+This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
+
+## Including Code
+
+You can include R code in the document as follows:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

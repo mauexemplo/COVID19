@@ -13,7 +13,7 @@ cities <- list( city = c( "Belo Horizonte", "Brasília", "Curitiba",
                                     "5208707", "1302603", "2611606", "3304557",
                                     "2927408", "3550308" )
 )
-states <- c( "MG", "DF", "PR", "CE", "GO", "AM", "PE", "RJ", "BA", "SP", "Brasil" )
+states <- c( "MG", "DF", "PR", "CE", "GO", "AM", "PE", "RJ", "BA", "SP" )
 
 # covidStats <- function( total )
 # {
