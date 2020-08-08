@@ -6,13 +6,11 @@ require( dplyr )
 
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
-cities <- list( city = c( "Belo Horizonte", "Brasília", "Curitiba",
-                          "Fortaleza", "Goiânia", "Manaus", "Recife",
-                          "Rio de Janeiro", "Salvador", "São Paulo" ),
-                city_ibge_code = c( "3106200", "5300108", "4106902", "2304400",
-                                    "5208707", "1302603", "2611606", "3304557",
-                                    "2927408", "3550308" )
-)
+cities <- c( `Belo Horizonte - MG` = "3106200", `Brasília - DF` = "5300108",
+             `Curitiba - PR` = "4106902", `Fortaleza - CE` = "2304400",
+             `Goiânia - GO` = "5208707", `Manaus - AM` = "1302603",
+             `Recife - PE` = "2611606", `Rio de Janeiro - RJ` = "3304557",
+             `Salvador - BA` = "2927408", `São Paulo - SP` = "3550308" )
 states <- c( "MG", "DF", "PR", "CE", "GO", "AM", "PE", "RJ", "BA", "SP" )
 
 # covidStats <- function( total )
@@ -109,7 +107,7 @@ BRStateStats <- dBrazil %>%
 BRCityStats <- dBrazil %>% 
   rename( total = last_available_deaths ) %>% 
   filter( total > 0, place_type == "city" ) %>%
-  mutate( date = ymd( date ), location = as.character( city_ibge_code ) ) %>% 
+  mutate( date = ymd( date ), location = paste( city, state, sep = " - " ) ) %>% 
   select( date, location, total ) %>%
   arrange( location, date ) %>% 
   group_by( location ) %>% 
@@ -131,11 +129,3 @@ todayCities <- BRCityStats %>%
   mutate( growth_l7 = ( week_l - shift( week_l, 7 ) ) /
             ( total_l - shift( total_l, 7 ) ) ) %>%
   filter( date == today() ) %>% arrange( desc( growth_l7 ) )
-
-# tsBRStD <- xts( select( BRStD, sort( colnames( BRStD ) ), -date ),
-#                 ymd( BRStD$date ) )
-# 
-# csPRD <- xts( covidStats( tsBRStD$PR ), index( tsBRStD ) )
-# csSPD <- xts( covidStats( tsBRStD$SP ), index( tsBRStD ) )
-# csRJD <- xts( covidStats( tsBRStD$RJ ), index( tsBRStD ) )
-# csBRD <- xts( covidStats( rowSums( BRStD[ , -1 ] ) ), ymd( BRStD$date ) )

@@ -2,7 +2,7 @@
 Atualizados diariamente, se tudo correr bem :smile:
 
 ## 1 - Estados Selecionados, Índice de Crescimento de Óbitos
-![Nacional e Estados - Índice de Crescimento de Óbitos](plots/states_gl7.svg "Nacional e Estados - Índice de Crescimento de Óbitos")
+![Estados - Índice de Crescimento de Óbitos](plots/states_gl7.svg "Estados - Índice de Crescimento de Óbitos")
 
 ## 2 - Capitais Selecionadas, Índice de Crescimento de Óbitos
 ![Capitais - Índice de Crescimento de Óbitos](plots/cities_gl7.svg "Capitais - Índice de Crescimento de Óbitos")
