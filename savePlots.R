@@ -70,7 +70,7 @@ multiStates_gl7 <- BRStateStats %>%
                  breaks = c( 10, 100, 1000, 10000, 100000 ),
                  labels = c( "10", "100", "1k", "10k", "100k" ) ) +
   labs( title = "Estados Selecionados - Taxa de crescimento de óbitos",
-        caption = "Fonte: Brasil.IO", color = NULL )
+        caption = plotCaption, color = NULL )
 
 multiCities_gl7 <- BRCityStats %>%
   filter( total >= 10, location %in% names( cities ) ) %>%
@@ -83,7 +83,7 @@ multiCities_gl7 <- BRCityStats %>%
                  breaks = c( 10, 50, 200, 500, 1000 ),
                  labels = c( "10", "50", "200", "500", "1k" ) ) +
   labs( title = "Capitais Selecionadas - Taxa de crescimento de óbitos",
-        caption = "Fonte: Brasil.IO", color = NULL )
+        caption = plotCaption, color = NULL )
 
 saveAll <- function( fileFormats = c( "png", "svg" ) )
 {
