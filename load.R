@@ -97,8 +97,8 @@ BRStateStats <- dBrazil %>%
                summarise( location = "Brasil", total = sum( total ) ) ) %>% 
   arrange( location, date ) %>% 
   group_by( location ) %>% 
-  mutate( day = total - lag( total, default = 0 ),
-          week = frollsum( day, 7 ),
+  mutate( day = as.integer( total - lag( total, default = 0 ) ),
+          week = as.integer( frollsum( day, 7 ) ),
           day_m7 = frollmean( day, 7 ),
           week_l = log1p( week ),
           total_l = log1p( total ) ) %>% 
@@ -111,8 +111,8 @@ BRCityStats <- dBrazil %>%
   select( date, location, total ) %>%
   arrange( location, date ) %>% 
   group_by( location ) %>% 
-  mutate( day = total - lag( total, default = 0 ),
-          week = frollsum( day, 7 ),
+  mutate( day = as.integer( total - lag( total, default = 0 ) ),
+          week = as.integer( frollsum( day, 7 ) ),
           day_m7 = frollmean( day, 7 ),
           week_l = log1p( week ),
           total_l = log1p( total ) ) %>% 
