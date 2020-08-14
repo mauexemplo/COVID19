@@ -59,7 +59,7 @@ savePlot <- function( plot, file_name, formats = defaultPlotFileFormat )
   map( plotNames, ggsave, plot = plot )
 }
 
-multiStates_gl7 <- BRStateStats %>%
+multiStates_gl7 <- BRStats %>%
   filter( total >= 10, location %in% states ) %>%
   ggplot( mapping = aes( x = total, y = week, color = location ) ) +
   geom_line() + geom_smooth( span = 0.5 ) +
@@ -72,7 +72,7 @@ multiStates_gl7 <- BRStateStats %>%
   labs( title = "Estados Selecionados - Taxa de crescimento de óbitos",
         caption = plotCaption, color = NULL )
 
-multiCities_gl7 <- BRCityStats %>%
+multiCities_gl7 <- BRStats %>%
   filter( total >= 10, location %in% names( cities ) ) %>%
   ggplot( mapping = aes( x = total, y = week, color = location ) ) +
   geom_line() + geom_smooth( span = 0.5 ) +
@@ -85,7 +85,7 @@ multiCities_gl7 <- BRCityStats %>%
   labs( title = "Capitais Selecionadas - Taxa de crescimento de óbitos",
         caption = plotCaption, color = NULL )
 
-saveAll <- function( fileFormats = c( "png", "svg" ) )
+saveAll <- function( fileFormats = "svg" )
 {
   map2( state_gl7s, paste0( states, "_gl7" ), savePlot, formats = fileFormats )
   map2( state_m7s, paste0( states, "_m7" ), savePlot, formats = fileFormats )

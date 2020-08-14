@@ -12,6 +12,7 @@ cities <- c( `Belo Horizonte - MG` = "3106200", `Brasília - DF` = "5300108",
              `Recife - PE` = "2611606", `Rio de Janeiro - RJ` = "3304557",
              `Salvador - BA` = "2927408", `São Paulo - SP` = "3550308" )
 states <- c( "MG", "DF", "PR", "CE", "GO", "AM", "PE", "RJ", "BA", "SP" )
+PRSaudeUrl <- "http://www.saude.pr.gov.br/Pagina/Coronavirus-COVID-19"
 
 # covidStats <- function( total )
 # {
@@ -119,13 +120,10 @@ BRCityStats <- dBrazil %>%
   ungroup()
 
 BRStats <- bind_rows( BRStateStats, BRCityStats )
+rm( BRCityStats )
+rm( BRStateStats )
 
-todayStates <- BRStateStats %>%
-  mutate( growth_l7 = ( week_l - shift( week_l, 7 ) ) /
-            ( total_l - shift( total_l, 7 ) ) ) %>%
-  filter( date == today() ) %>% arrange( desc( growth_l7 ) )
-
-todayCities <- BRCityStats %>%
-  mutate( growth_l7 = ( week_l - shift( week_l, 7 ) ) /
-            ( total_l - shift( total_l, 7 ) ) ) %>%
-  filter( date == today() ) %>% arrange( desc( growth_l7 ) )
+lastStats <- BRStats %>%
+  mutate( growth_l7 = ( week_l - shift( week_l, 7 ) ) / ( total_l - shift( total_l, 7 ) ) ) %>%
+  group_by( location ) %>% filter( date == max( date ) ) %>% ungroup() %>%
+  arrange( desc( growth_l7 ) )
