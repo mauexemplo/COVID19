@@ -119,13 +119,10 @@ BRCityStats <- dBrazil %>%
   ungroup()
 
 BRStats <- bind_rows( BRStateStats, BRCityStats )
+rm( BRCityStats )
+rm( BRStateStats )
 
-todayStates <- BRStateStats %>%
-  mutate( growth_l7 = ( week_l - shift( week_l, 7 ) ) /
-            ( total_l - shift( total_l, 7 ) ) ) %>%
-  filter( date == today() ) %>% arrange( desc( growth_l7 ) )
-
-todayCities <- BRCityStats %>%
-  mutate( growth_l7 = ( week_l - shift( week_l, 7 ) ) /
-            ( total_l - shift( total_l, 7 ) ) ) %>%
-  filter( date == today() ) %>% arrange( desc( growth_l7 ) )
+lastStats <- BRStats %>%
+  mutate( growth_l7 = ( week_l - shift( week_l, 7 ) ) / ( total_l - shift( total_l, 7 ) ) ) %>%
+  group_by( location ) %>% filter( date == max( date ) ) %>% ungroup() %>%
+  arrange( desc( growth_l7 ) )
