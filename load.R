@@ -89,41 +89,61 @@ dBrazil <- load_BrasilIo()
 #                values_from = last_available_deaths,
 #                values_fill = 0 )
 
-BRStateStats <- dBrazil %>% 
+# BRStateStats <- dBrazil %>% 
+#   rename( total = last_available_deaths ) %>% 
+#   filter( total > 0, place_type == "state" ) %>%
+#   mutate( date = ymd( date ), location = state ) %>% 
+#   select( date, location, total ) %>%
+#   bind_rows( group_by( ., date ) %>% 
+#                summarise( location = "Brasil", total = sum( total ) ) ) %>% 
+#   arrange( location, date ) %>% 
+#   group_by( location ) %>% 
+#   mutate( day = as.integer( total - lag( total, default = 0 ) ),
+#           week = as.integer( total - lag( total, n = 7, default = 0 ) ),
+#           day_m7 = frollmean( day, 7 ) ) %>% 
+#   ungroup()
+
+# BRCityStats <- dBrazil %>% 
+#   rename( total = last_available_deaths ) %>% 
+#   filter( total > 0, place_type == "city" ) %>%
+#   mutate( date = ymd( date ), location = paste( city, state, sep = " - " ) ) %>% 
+#   select( date, location, total ) %>%
+#   arrange( location, date ) %>% 
+#   group_by( location ) %>% 
+#   mutate( day = as.integer( total - lag( total, default = 0 ) ),
+#           week = as.integer( total - lag( total, n = 7, default = 0 ) ),
+#           day_m7 = frollmean( day, 7 ) ) %>% 
+#   ungroup()
+
+BRStats <- dBrazil %>% 
+  rename( total = last_available_deaths ) %>% 
+  filter( total > 0 ) %>% 
+  mutate( location = if_else( place_type == "state", state,
+                              paste( city, state, sep = " - " ) ) ) %>%
+  select( date, location, total )
+
+BRSummary <- dBrazil %>% 
   rename( total = last_available_deaths ) %>% 
   filter( total > 0, place_type == "state" ) %>%
-  mutate( date = ymd( date ), location = state ) %>% 
-  select( date, location, total ) %>%
-  bind_rows( group_by( ., date ) %>% 
-               summarise( location = "Brasil", total = sum( total ) ) ) %>% 
+  group_by( date ) %>% 
+  summarise( location = "Brasil", total = sum( total ) ) %>% 
+  ungroup()
+  
+BRStats <- bind_rows( BRStats, BRSummary ) %>%
+  mutate( date = ymd( date ) ) %>% 
   arrange( location, date ) %>% 
   group_by( location ) %>% 
   mutate( day = as.integer( total - lag( total, default = 0 ) ),
-          week = as.integer( frollsum( day, 7 ) ),
-          day_m7 = frollmean( day, 7 ),
-          week_l = log1p( week ),
-          total_l = log1p( total ) ) %>% 
+          week = as.integer( total - lag( total, n = 7, default = 0 ) ),
+          day_m7 = frollmean( day, 7 ) ) %>% 
   ungroup()
 
-BRCityStats <- dBrazil %>% 
-  rename( total = last_available_deaths ) %>% 
-  filter( total > 0, place_type == "city" ) %>%
-  mutate( date = ymd( date ), location = paste( city, state, sep = " - " ) ) %>% 
-  select( date, location, total ) %>%
-  arrange( location, date ) %>% 
-  group_by( location ) %>% 
-  mutate( day = as.integer( total - lag( total, default = 0 ) ),
-          week = as.integer( frollsum( day, 7 ) ),
-          day_m7 = frollmean( day, 7 ),
-          week_l = log1p( week ),
-          total_l = log1p( total ) ) %>% 
-  ungroup()
-
-BRStats <- bind_rows( BRStateStats, BRCityStats )
-rm( BRCityStats )
-rm( BRStateStats )
+rm( BRSummary )
+rm( dBrazil )
+# rm( BRCityStats )
+# rm( BRStateStats )
 
 lastStats <- BRStats %>%
-  mutate( growth_l7 = ( week_l - shift( week_l, 7 ) ) / ( total_l - shift( total_l, 7 ) ) ) %>%
+  mutate( growth_7 = 1 / ( lag( week, 7 ) / week ) ) %>%
   group_by( location ) %>% filter( date == max( date ) ) %>% ungroup() %>%
-  arrange( desc( growth_l7 ) )
+  arrange( desc( growth_7 ) )
