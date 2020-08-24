@@ -144,6 +144,7 @@ rm( dBrazil )
 # rm( BRStateStats )
 
 lastStats <- BRStats %>%
-  mutate( growth_7 = 1 / ( lag( week, 7 ) / week ) ) %>%
-  group_by( location ) %>% filter( date == max( date ) ) %>% ungroup() %>%
+  group_by( location ) %>%
+  mutate( growth_7 = 1 - ( lag( week, 7 ) / week ) ) %>%
+  filter( date == max( date ) ) %>% ungroup() %>%
   arrange( desc( growth_7 ) )
