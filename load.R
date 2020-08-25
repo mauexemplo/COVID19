@@ -12,7 +12,11 @@ cities <- c( `Belo Horizonte - MG` = "3106200", `Brasília - DF` = "5300108",
              `Recife - PE` = "2611606", `Rio de Janeiro - RJ` = "3304557",
              `Salvador - BA` = "2927408", `São Paulo - SP` = "3550308" )
 states <- c( "MG", "DF", "PR", "CE", "GO", "AM", "PE", "RJ", "BA", "SP" )
+countries <- c( `Brasil` = "Brazil", `Argentina` = "Argentina", `Canadá` = "Canada",
+                `EUA` = "US", `Reino Unido` = "United Kingdom",
+                `França` = "France", `Alemanha` = "Germany", `Itália` = "Italy" )
 PRSaudeUrl <- "http://www.saude.pr.gov.br/Pagina/Coronavirus-COVID-19"
+countries_initial_deaths_cutoff <- 50L
 
 # covidStats <- function( total )
 # {
@@ -46,7 +50,20 @@ load_BrasilIo <- function( url = dBrazilUrl )
 { fread( url, encoding = "UTF-8" ) }
 
 load_JHUGSSEGlobal <- function( url = dGlobalUrl )
-{ fread( url ) }
+{
+  temp <- fread( url )
+  temp %>%
+    pivot_longer( -(1:4), names_to = "date", values_to = "total",
+                  names_transform = list( date = mdy ) ) %>%
+    group_by( date, `Country/Region` ) %>% summarise( total = sum( total ) ) %>% ungroup() %>% 
+    rename( location = `Country/Region` ) %>% 
+    group_by( location ) %>% 
+    mutate( day = as.integer( total - lag( total, default = 0 ) ),
+            week = as.integer( total - lag( total, n = 7, default = 0 ) ),
+            day_m7 = frollmean( day, 7 ) ) %>% 
+    ungroup() %>% 
+    filter( total > countries_initial_deaths_cutoff )
+}
 
 load_homePRSaude <- function( url = PRSaudeUrl )
 {
@@ -148,3 +165,5 @@ lastStats <- BRStats %>%
   mutate( growth_7 = 1 - ( lag( week, 7 ) / week ) ) %>%
   filter( date == max( date ) ) %>% ungroup() %>%
   arrange( desc( growth_7 ) )
+
+JHUStats <- load_JHUGSSEGlobal()

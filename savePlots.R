@@ -11,6 +11,7 @@ if ( !exists( "BRStats" ) ||
 
 plotFolder <- "plots"
 plotCaption <- "Fonte: Brasil.IO"
+JHUCaption <- "Fonte: JHU GSSE no GitHub"
 defaultPlotFileFormat <- "png"
 
 plotGL7 <- function( data, loc, loc_name = loc, ... )
@@ -50,6 +51,11 @@ city_gl7s <- map2( names( cities ), names( cities ), plotGL7,
 city_m7s <- map2( names( cities ), names( cities ), plotM7,
                   data = BRStats, caption = plotCaption )
 
+country_gl7s <- map2( countries, names( countries ), plotGL7,
+                      data = JHUStats, caption = JHUCaption )
+country_m7s <- map2( countries, names( countries ), plotM7,
+                      data = JHUStats, caption = JHUCaption )
+
 sumStates_gl7 <- plotGL7( BRStats, "Brasil", caption = plotCaption )
 sumStates_m7 <- plotM7( BRStats, "Brasil", caption = plotCaption )
 
@@ -85,6 +91,20 @@ multiCities_gl7 <- BRStats %>%
   labs( title = "Capitais Selecionadas - Taxa de crescimento de óbitos",
         caption = plotCaption, color = NULL )
 
+multiCountries_gl7 <- JHUStats %>%
+  filter( location %in% countries ) %>%
+  ggplot( mapping = aes( x = total, y = week, color = location ) ) +
+  geom_line() + geom_smooth( span = 0.5, se = FALSE ) +
+  scale_x_log10( "Total (log)",
+                 breaks = c( 50, 200, 1000, 5000, 10000, 50000, 100000, 250000 ),
+                 labels = c( "50", "200", "1k", "5k", "10k", "50k", "100k", "250k" ) ) +
+  scale_y_log10( "Acumulado 7 dias (log)",
+                 breaks = c( 50, 200, 500, 1000, 5000, 10000, 25000 ),
+                 labels = c( "50", "200", "500", "1k", "5k", "10k", "25k" ) ) +
+  scale_color_discrete( breaks = countries, labels = names( countries ) ) +
+  labs( title = "Países Selecionados - Taxa de crescimento de óbitos",
+        caption = JHUCaption, color = NULL )
+
 saveAll <- function( fileFormats = "svg" )
 {
   map2( state_gl7s, paste0( states, "_gl7" ), savePlot, formats = fileFormats )
@@ -99,4 +119,6 @@ saveAll <- function( fileFormats = "svg" )
   savePlot( multiStates_gl7, "states_gl7", fileFormats )
   
   savePlot( multiCities_gl7, "cities_gl7", fileFormats )
+  
+  savePlot( multiCountries_gl7, "countries_gl7", fileFormats )
 }

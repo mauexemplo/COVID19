@@ -31,3 +31,6 @@ Atualizados diariamente, se tudo correr bem :smile:
 ![Belo Horizonte - Média Móvel](plots/3106200_m7.svg)
 ![Brasília - Média Móvel](plots/5300108_m7.svg)
 ![Curitiba - Média Móvel](plots/4106902_m7.svg)
+
+## 6 - Países Selecionados, Índice de Crescimento de Óbitos
+![Países - Crescimento](plots/countries_gl7.svg)
