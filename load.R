@@ -160,10 +160,12 @@ rm( dBrazil )
 # rm( BRCityStats )
 # rm( BRStateStats )
 
-lastStats <- BRStats %>%
+JHUStats <- load_JHUGSSEGlobal()
+
+lastStats <- JHUStats %>% 
+  filter( location != "Brazil" ) %>% 
+  bind_rows( BRStats ) %>%
   group_by( location ) %>%
   mutate( growth_7 = 1 - ( lag( week, 7 ) / week ) ) %>%
   filter( date == max( date ) ) %>% ungroup() %>%
   arrange( desc( growth_7 ) )
-
-JHUStats <- load_JHUGSSEGlobal()
