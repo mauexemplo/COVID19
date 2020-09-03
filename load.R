@@ -61,7 +61,6 @@ load_JHUGSSEGlobal <- function( url = dGlobalUrl )
     mutate( day = as.integer( total - lag( total, default = 0 ) ),
             week = as.integer( total - lag( total, n = 7, default = 0 ) ),
             day_m7 = frollmean( day, 7 ) ) %>% 
-    ungroup() %>% 
     filter( total > countries_initial_deaths_cutoff )
 }
 
@@ -152,8 +151,7 @@ BRStats <- bind_rows( BRStats, BRSummary ) %>%
   group_by( location ) %>% 
   mutate( day = as.integer( total - lag( total, default = 0 ) ),
           week = as.integer( total - lag( total, n = 7, default = 0 ) ),
-          day_m7 = frollmean( day, 7 ) ) %>% 
-  ungroup()
+          day_m7 = frollmean( day, 7 ) )
 
 rm( BRSummary )
 rm( dBrazil )
