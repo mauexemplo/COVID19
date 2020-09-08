@@ -170,8 +170,7 @@ calc_SubArea <- function( data, name, locs )
 
 calcAll_SubAreas <- function( data, areas )
 {
-  map2( names( areas ), areas, calc_SubArea, data = data ) %>% 
-    reduce( bind_rows )
+  map2_dfr( names( areas ), areas, calc_SubArea, data = data )
 }
 
 dBrazil <- load_BrasilIo()

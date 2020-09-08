@@ -4,8 +4,9 @@ Atualizados diariamente, se tudo correr bem :smile:
 ## 1 - Estados Selecionados, Índice de Crescimento de Óbitos
 ![Estados - Índice de Crescimento de Óbitos](plots/states_gl7.svg "Estados - Índice de Crescimento de Óbitos")
 
-## 2 - Capitais Selecionadas, Índice de Crescimento de Óbitos
+## 2 - Capitais e RMs Selecionadas, Índice de Crescimento de Óbitos
 ![Capitais - Índice de Crescimento de Óbitos](plots/cities_gl7.svg "Capitais - Índice de Crescimento de Óbitos")
+![RMs - Índice de Crescimento de Óbitos](plots/metros_gl7.svg "RMs - Índice de Crescimento de Óbitos")
 
 ## 3 - Nacional e Estados Selecionados, Médias Móveis (7 dias) de Óbitos
 ![Brasil - Média Móvel](plots/Brasil_m7.svg "Brasil - Média Móvel")
