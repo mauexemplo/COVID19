@@ -6,7 +6,7 @@ require( lubridate )
 if ( !exists( "BRStats" ) ||
      today() - max( BRStats$date ) > days( 1 ) )
 {
-  source( "load.R" )
+  source( "load.R", encoding = "UTF-8" )
 }
 
 plotFolder <- "plots"
