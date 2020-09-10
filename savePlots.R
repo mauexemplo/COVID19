@@ -2,6 +2,7 @@ require( ggplot2 )
 require( svglite )
 require( purrr )
 require( lubridate )
+require( stringr )
 
 if ( !exists( "BRStats" ) ||
      today() - max( BRStats$date ) > days( 1 ) )
