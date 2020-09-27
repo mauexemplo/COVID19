@@ -11,8 +11,9 @@ if ( !exists( "BRStats" ) ||
 }
 
 plotFolder <- "plots"
-plotCaption <- "Fonte: Brasil.IO"
-JHUCaption <- "Fonte: JHU GSSE no GitHub"
+lastUpdate <- format( now(), "%d/%m/%Y %H:%M" )
+plotCaption <- paste( "Fonte: Brasil.IO - ", lastUpdate )
+JHUCaption <- paste( "Fonte: JHU GSSE no GitHub - ", lastUpdate )
 defaultPlotFileFormat <- "png"
 
 plot_GL7 <- function( data, loc_name, ... )
