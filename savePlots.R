@@ -72,59 +72,62 @@ sumStates_m7 <- plot_LocM7( BRStats, "Brasil", caption = plotCaption )
 savePlot <- function( plot, file_name, formats = defaultPlotFileFormat )
 {
   plotNames <- paste( file.path( plotFolder, file_name ), formats, sep = "." )
-  map( plotNames, ggsave, plot = plot )
+  map( plotNames, ggsave, plot = plot, scale = 1.5 )
 }
 
 multiStates_gl7 <- BRStats %>%
-  filter( total >= 10, location %in% states ) %>%
+  filter( total >= 10, location %in% hls_State ) %>%
   ggplot( mapping = aes( x = total, y = week, color = location ) ) +
-  geom_line() + geom_smooth( span = 0.5 ) +
+  geom_smooth( span = 0.4 ) +
   scale_x_log10( "Total (log)",
                  breaks = c( 10, 100, 1000, 10000, 100000 ),
                  labels = c( "10", "100", "1k", "10k", "100k" ) ) +
   scale_y_log10( "Acumulado 7 dias (log)",
                  breaks = c( 10, 100, 1000, 10000, 100000 ),
                  labels = c( "10", "100", "1k", "10k", "100k" ) ) +
+  theme( legend.position = "bottom" ) +
   labs( title = "Estados Selecionados - Taxa de crescimento de óbitos",
         caption = plotCaption, color = NULL )
 
 multiCities_gl7 <- BRStats %>%
   filter( total >= 10, location %in% names( cities ) ) %>%
   ggplot( mapping = aes( x = total, y = week, color = location ) ) +
-  geom_line() + geom_smooth( span = 0.5 ) +
+  geom_smooth( span = 0.4 ) +
   scale_x_log10( "Total (log)",
                  breaks = c( 10, 50, 200, 1000, 5000, 10000 ),
                  labels = c( "10", "50", "200", "1k", "5k", "10k" ) ) +
   scale_y_log10( "Acumulado 7 dias (log)",
                  breaks = c( 10, 50, 200, 500, 1000 ),
                  labels = c( "10", "50", "200", "500", "1k" ) ) +
+  theme( legend.position = "bottom" ) +
   labs( title = "Capitais Selecionadas - Taxa de crescimento de óbitos",
         caption = plotCaption, color = NULL )
 
 multiCountries_gl7 <- JHUStats %>%
-  filter( location %in% countries ) %>%
+  filter( location %in% hls_Global ) %>%
   ggplot( mapping = aes( x = total, y = week, color = location ) ) +
-  geom_line() + geom_smooth( span = 0.5, se = FALSE ) +
+  geom_smooth( span = 0.4 ) +
   scale_x_log10( "Total (log)",
                  breaks = c( 50, 200, 1000, 5000, 10000, 50000, 100000, 250000 ),
                  labels = c( "50", "200", "1k", "5k", "10k", "50k", "100k", "250k" ) ) +
   scale_y_log10( "Acumulado 7 dias (log)",
                  breaks = c( 50, 200, 500, 1000, 5000, 10000, 25000 ),
                  labels = c( "50", "200", "500", "1k", "5k", "10k", "25k" ) ) +
-  scale_color_discrete( breaks = countries, labels = names( countries ) ) +
+  theme( legend.position = "bottom" ) +
   labs( title = "Países Selecionados - Taxa de crescimento de óbitos",
         caption = JHUCaption, color = NULL )
 
 multiMetros_gl7 <- BRStats %>% 
-  filter( total >= 10, str_detect( location, prefix_metros ) ) %>%
+  filter( location %in% hls_RM ) %>%
   ggplot( mapping = aes( x = total, y = week, color = location ) ) +
-  geom_line() + geom_smooth( span = 0.5 ) +
+  geom_smooth( span = 0.4 ) +
   scale_x_log10( "Total (log)",
                  breaks = c( 10, 50, 200, 1000, 5000, 10000 ),
                  labels = c( "10", "50", "200", "1k", "5k", "10k" ) ) +
   scale_y_log10( "Acumulado 7 dias (log)",
                  breaks = c( 10, 50, 200, 500, 1000 ),
                  labels = c( "10", "50", "200", "500", "1k" ) ) +
+  theme( legend.position = "bottom" ) +
   labs( title = "Regiões Metropolitanas Selecionadas - Taxa de crescimento de óbitos",
         caption = plotCaption, color = NULL )
 
