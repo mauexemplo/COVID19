@@ -302,23 +302,26 @@ lastStats <- JHUStats %>%
   filter( date == max( date ) ) %>% ungroup() %>%
   arrange( desc( growth_7 ) )
 
-hls_Global <- lastStats %>% filter( growth_7 != Inf,
-                                    location %in% JHUStats$location,
-                                    week > highlights_week_cutoff ) %>% 
+hls_Global <- lastStats %>%
+  filter( growth_7 != Inf,
+          location %in% JHUStats$location,
+          week > highlights_week_cutoff ) %>% 
   head( highlights_count - 1L ) %>% 
   select( location ) %>% 
   bind_rows( data.frame( location = c( "Brazil" ) ) ) %>% 
   unlist( use.names = FALSE )
 
-hls_RM <- lastStats %>% filter( growth_7 != Inf, isRM( location ),
-                                week > highlights_week_cutoff ) %>% 
+hls_RM <- lastStats %>%
+  filter( growth_7 != Inf, isRM( location ),
+          week > highlights_week_cutoff ) %>% 
   head( highlights_count ) %>% 
   select( location ) %>% 
   unlist( use.names = FALSE )
 
-hls_State <- lastStats %>% filter( growth_7 != Inf,
-                                   nchar( location ) == 2L,
-                                   week > highlights_week_cutoff ) %>% 
+hls_State <- lastStats %>%
+  filter( growth_7 != Inf,
+          nchar( location ) == 2L,
+          week > highlights_week_cutoff ) %>% 
   head( highlights_count ) %>% 
   select( location ) %>% 
   unlist( use.names = FALSE )
