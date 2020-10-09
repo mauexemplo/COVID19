@@ -1,5 +1,4 @@
 # Gráficos sobre a pandemia de COVID-19 no Brasil
-Atualizados diariamente, se tudo correr bem :smile:
 
 ## 1 - Estados Selecionados, Índice de Crescimento de Óbitos
 ![Estados - Índice de Crescimento de Óbitos](plots/states_gl7.svg "Estados - Índice de Crescimento de Óbitos")
