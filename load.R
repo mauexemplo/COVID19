@@ -4,9 +4,14 @@ require( lubridate )
 require( tidyr )
 require( dplyr )
 require( purrr )
+require( readxl )
 
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
+dPRUrl <- NULL
+dHomePRUrl <- "https://www.saude.pr.gov.br/Pagina/Coronavirus-COVID-19"
+ibge_file <- "RELATORIO_DTB_BRASIL_MUNICIPIO.xls"
+
 cities <- c( `Belo Horizonte - MG` = "3106200", `Brasília - DF` = "5300108",
              `Curitiba - PR` = "4106902", `Fortaleza - CE` = "2304400",
              `Goiânia - GO` = "5208707", `Manaus - AM` = "1302603",
@@ -227,6 +232,16 @@ highlights_week_cutoff <- 5L
 highlights_count <- 10L
 countries_initial_deaths_cutoff <- 50L
 
+load_IBGE_DTB <- function( path = ibge_file )
+{
+  read_excel( path )
+}
+
+parse_IBGE_estados <- function( ibge_data )
+{
+  
+}
+
 load_BrasilIo <- function( url = dBrazilUrl )
 { fread( url, encoding = "UTF-8" ) }
 
@@ -243,6 +258,20 @@ load_JHUGSSEGlobal <- function( url = dGlobalUrl )
             week = as.integer( total - lag( total, n = 7, default = 0 ) ),
             day_m7 = frollmean( day, 7 ) ) %>% 
     filter( total > countries_initial_deaths_cutoff )
+}
+
+load_PR <- function( url = dPRUrl )
+{
+  if( is.null( url ) )
+  {
+    url <- find_PRUrl()
+  }
+  
+}
+
+find_PRUrl <- function( homePRUrl = dHomePRUrl )
+{
+  
 }
 
 calc_SubArea <- function( data, name, locs )
