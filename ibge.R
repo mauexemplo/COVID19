@@ -1,7 +1,4 @@
-require( dplyr )
-require( httr )
-require( readxl )
-require( jsonlite )
+agent <- httr::user_agent( "https://github.com/mauexemplo/COVID19" )
 
 ibge_rms_url <-
   "https://geoftp.ibge.gov.br/organizacao_do_territorio/estrutura_territorial/municipios_por_regioes_metropolitanas/Situacao_2020a2029/Composicao_RMs_RIDEs_AglomUrbanas_2020_06_30.xlsx"
@@ -23,39 +20,48 @@ ibge_api_endpoints <- data.frame(
             "Região Intermediária", "Região Imediata", "Mesorregião",
             "Microrregião" ),
   group = factor( c( "Divisão Político-Administrativa",
-             "Divisão Político-Administrativa",
-             "Divisão Político-Administrativa",
-             "Divisão Político-Administrativa",
-             "Divisão Político-Administrativa",
-             "Regiões Geográficas",
-             "Regiões Geográficas",
-             "Mesorregiões e Microrregiões",
-             "Mesorregiões e Microrregiões" ) ),
+                     "Divisão Político-Administrativa",
+                     "Divisão Político-Administrativa",
+                     "Divisão Político-Administrativa",
+                     "Divisão Político-Administrativa",
+                     "Regiões Geográficas",
+                     "Regiões Geográficas",
+                     "Mesorregiões e Microrregiões",
+                     "Mesorregiões e Microrregiões" ) ),
   order_in_group = c( 1, 2, 3, 4, 5, 1, 2, 1, 2 ),
   endpoint = c( "regioes", "estados", "municipios", "distritos",
                 "subdistritos", "regioes-intermediarias", "regioes-imediatas",
                 "mesorregioes", "microrregioes" ),
   filters = I( list( `regioes` = c(),
-                     `estados` = c( "regioes" ),
-                     `municipios` = c( "estados", "mesorregioes",
-                                       "microrregioes", "regioes-imediatas",
-                                       "regioes-intermediarias", "regioes" ),
-                     `distritos` = c( "estados", "mesorregioes",
-                                      "microrregioes", "municipios",
-                                      "regioes-imediatas",
-                                      "regioes-intermediarias", "regioes" ),
-                     `subdistritos` = c( "distrito", "estados", "mesorregioes",
-                                         "microrregioes", "municipios",
-                                         "regioes" ),
-                     `regioes-intermediarias` = c( "estados", "regioes" ),
-                     `regioes-imediatas` = c( "estados",
-                                              "regioes-intermediarias",
-                                              "regioes" ),
-                     `mesorregioes` = c( "estados", "regioes" ),
-                     `microrregioes` = c( "estados", "mesorregioes", "regioes" )
+                     `estados` = c( "regiao" ),
+                     `municipios` = c( "UF", "mesorregiao",
+                                       "microrregiao", "regiao-imediata",
+                                       "regiao-intermediaria", "regiao" ),
+                     `distritos` = c( "UF", "mesorregiao",
+                                      "microrregiao", "municipio",
+                                      "regiao-imediata",
+                                      "regiao-intermediaria", "regiao" ),
+                     `subdistritos` = c( "distrito", "UF", "mesorregiao",
+                                         "microrregiao", "municipio",
+                                         "regiao" ),
+                     `regioes-intermediarias` = c( "UF", "regiao" ),
+                     `regioes-imediatas` = c( "UF",
+                                              "regiao-intermediaria",
+                                              "regiao" ),
+                     `mesorregioes` = c( "UF", "regiao" ),
+                     `microrregioes` = c( "UF", "mesorregiao", "regiao" )
+                     )
+               ),
+  parents = I( list( c(), c( "regiao" ), c( "microrregiao", "regiao-imediata" ),
+                     c( "municipio" ), c( "distrito" ), c( "UF" ),
+                     c( "regiao-intermediaria" ), c( "UF" ), c( "mesorregiao" ) 
                      )
                )
   )
+
+ibge_loc_types <- c( "regiao", "UF", "municipio", "distrito",
+                     "subdistrito", "regiao-intermediaria", "regiao-imediata",
+                     "mesorregiao", "microrregiao" )
 
 
 # Download, unzip and import the DTB file
@@ -244,40 +250,122 @@ getCities <- function( dtb_data = NULL, rm_data = NULL, drb_data = NULL )
   return ( flatCities )
 }
 
-# Provides full details about an individual city, or all cities if unspecified
-getCityByID <- function( id = NULL, ... )
+# Maps an API result type name to its index on ibge_api_endpoints
+ibgeLocTypeID <- function( name )
+{ return( match( name, ibge_loc_types ) ) }
+
+# Shortcuts for getLocalidade
+# Retrieve selected or all locations of a given type
+getCity <- function( id = NULL, filter = NULL )
+{ return( getLocation( "municipio", id, filter ) ) }
+
+getMicroregion <- function( id = NULL, filter = NULL )
+{ return( getLocation( "microrregiao", id, filter ) ) }
+
+getMesoregion <- function( id = NULL, filter = NULL )
+{ return( getLocation( "mesorregiao", id, filter ) ) }
+
+getImmediate <- function( id = NULL, filter = NULL )
+{ return( getLocation( "regiao-imediata", id, filter ) ) }
+
+getIntermediate <- function( id = NULL, filter = NULL )
+{ return( getLocation( "regiao-intermediaria", id, filter ) ) }
+
+getState <- function( id = NULL, filter = NULL )
+{ return( getLocation( "UF", id, filter ) ) }
+
+getRegion <- function( id = NULL, filter = NULL )
+{ return( getLocation( "regiao", id, filter ) ) }
+
+getDistrict <- function( id = NULL, filter = NULL )
+{ return( getLocation( "distrito", id, filter ) ) }
+
+getSubdistrict <- function( id = NULL, filter = NULL )
+{ return( getLocation( "regiao-intermediaria", id, filter ) ) }
+
+getLocation <- function( type = ibge_loc_types, id = NULL, filter = NULL )
 {
-  url <- paste0( ibge_api_host,
-                 ibge_api_endpoints[
-                   ibge_api_endpoints$name == "Município", "endpoint" ] )
-  if( !is.null( id ) )
-  {
-    url <- paste( url, id, sep = "/" )
-  }
-
-  
-
+  return( parseLocalidade( queryLocalidade( match.arg( type ), id, filter ) ) )
 }
 
 # Generic retrieval using the Localidade API
-getLocalidade <- function( type, id = NULL, filter = NULL, ... )
+queryLocalidade <- function( type = ibge_loc_types, id = NULL, filter = NULL )
 {
-  #TODO: Validate type and filter with match.arg
-  
+  type <- match.arg( type )
+  endpoint <- ibge_api_endpoints[ ibgeLocTypeID( type ), "endpoint" ]
   url <- paste( ibge_api_host, ibge_loc_api_path, sep = "/" )
   
   if( length( id ) > 1 )
     id <- paste( id, collapse = "|" )
   
   if( !is.null( filter ) )
-  { url <- paste( url, filter, id, type, sep = "/" ) }
+  {
+    filter <- match.arg( filter, ibge_api_endpoints$filters[[ endpoint ]] )
+    end_filter <- ibge_api_endpoints[ ibgeLocTypeID( filter ), "endpoint" ]
+    url <- paste( url, end_filter, id, endpoint, sep = "/" )
+  }
   else if( !is.null( id ) )
-  { url <- paste( url, type, id, sep = "/" ) }
+  { url <- paste( url, endpoint, id, sep = "/" ) }
   else
-  { url <- paste( url, type, sep = "/" ) }
+  { url <- paste( url, endpoint, sep = "/" ) }
 
-  warning( url )
+  resp <- httr::GET( url, agent )
+
+  if( httr::http_type( resp ) != "application/json" )
+  { stop( paste0( "getLocalidade: IBGE API response not JSON, URL: ", url ) ) }
+  else if( httr::status_code( resp ) != 200 )
+  { stop( paste0( "getLocalidade: IBGE API request failed, URL: ", url ) ) }
   
-  #TODO: Add user agent, validate response
-  return( jsonlite::fromJSON( url ) )
+  parsed <- jsonlite::fromJSON( httr::content( resp, "text" ) )
+
+  result <- structure(
+    list( content = parsed, type = type, id = id, filter = filter,
+          response = resp ),
+    class = "ibge_localidade_api"
+  )
+  
+  return( result )
+}
+
+# Shortcut for column renaming during parse
+parseColName <- function( name, type = ibge_loc_types )
+{
+  type <- match.arg( type )
+  type_name <- ibge_api_endpoints[ ibgeLocTypeID( type ), "name" ]
+  parsed <- switch( name,
+    "id" = type_name,
+    "nome" = paste0( "Nome_", type_name ),
+    "sigla" = paste0( "Sigla_", type_name ),
+    ibge_api_endpoints[ ibgeLocTypeID( name ), "name" ]
+  )
+  return( parsed )
+}
+
+# Transform api results list into DF with all direct result columns, and only
+# direct-relation IDs, and rename columns
+parseLocalidade <- function( api_result )
+{
+  stopifnot( class( api_result ) == "ibge_localidade_api" )
+
+  # Shortcut for base (direct results) column indexes
+  colIDs <- ibgeLocTypeID( names( api_result$content ) )
+  
+  # Separate direct results and name them
+  base <- api_result$content[ is.na( colIDs ) ]
+  names( base ) = sapply( names( base ),
+                          function( x ) { parseColName( x, api_result$type ) } )
+
+  # Check if need to work on related (parent locations) results
+  if( any( !is.na( colIDs ) ) )
+  {
+    #Retrieve relation IDs from within nested DFs, and rename
+    rels <- data.frame(
+      sapply( api_result$content[ !is.na( colIDs ) ], '[[', "id" ) )
+    names( rels ) = sapply( names( api_result$content )[ !is.na( colIDs ) ],
+        function( x ) { parseColName( x, api_result$type ) }
+      )
+    base <- cbind( base, rels )
+  }
+
+  return( base )
 }
