@@ -16,51 +16,32 @@ ibge_dtb_ext <- ".xls"
 ibge_api_host <- "https://servicodados.ibge.gov.br"
 ibge_loc_api_path <- "api/v1/localidades"
 ibge_api_endpoints <- data.frame(
-  name = c( "Região", "UF", "Município", "Distrito", "Subdistrito",
-            "Região Intermediária", "Região Imediata", "Mesorregião",
-            "Microrregião" ),
-  group = factor( c( "Divisão Político-Administrativa",
-                     "Divisão Político-Administrativa",
-                     "Divisão Político-Administrativa",
-                     "Divisão Político-Administrativa",
-                     "Divisão Político-Administrativa",
-                     "Regiões Geográficas",
-                     "Regiões Geográficas",
-                     "Mesorregiões e Microrregiões",
-                     "Mesorregiões e Microrregiões" ) ),
+  name = c( "Região", "UF", "Município", "Distrito", "Subdistrito", "Região Intermediária", "Região Imediata",
+            "Mesorregião", "Microrregião" ),
+  group = factor( c( "Divisão Político-Administrativa", "Divisão Político-Administrativa",
+                     "Divisão Político-Administrativa", "Divisão Político-Administrativa",
+                     "Divisão Político-Administrativa", "Regiões Geográficas", "Regiões Geográficas",
+                     "Mesorregiões e Microrregiões", "Mesorregiões e Microrregiões" ) ),
   order_in_group = c( 1, 2, 3, 4, 5, 1, 2, 1, 2 ),
-  endpoint = c( "regioes", "estados", "municipios", "distritos",
-                "subdistritos", "regioes-intermediarias", "regioes-imediatas",
-                "mesorregioes", "microrregioes" ),
+  endpoint = c( "regioes", "estados", "municipios", "distritos", "subdistritos", "regioes-intermediarias",
+                "regioes-imediatas", "mesorregioes", "microrregioes" ),
   filters = I( list( `regioes` = c(),
                      `estados` = c( "regiao" ),
-                     `municipios` = c( "UF", "mesorregiao",
-                                       "microrregiao", "regiao-imediata",
-                                       "regiao-intermediaria", "regiao" ),
-                     `distritos` = c( "UF", "mesorregiao",
-                                      "microrregiao", "municipio",
-                                      "regiao-imediata",
+                     `municipios` = c( "UF", "mesorregiao", "microrregiao", "regiao-imediata", "regiao-intermediaria",
+                                       "regiao" ),
+                     `distritos` = c( "UF", "mesorregiao", "microrregiao", "municipio", "regiao-imediata",
                                       "regiao-intermediaria", "regiao" ),
-                     `subdistritos` = c( "distrito", "UF", "mesorregiao",
-                                         "microrregiao", "municipio",
-                                         "regiao" ),
+                     `subdistritos` = c( "distrito", "UF", "mesorregiao", "microrregiao", "municipio", "regiao" ),
                      `regioes-intermediarias` = c( "UF", "regiao" ),
-                     `regioes-imediatas` = c( "UF",
-                                              "regiao-intermediaria",
-                                              "regiao" ),
+                     `regioes-imediatas` = c( "UF", "regiao-intermediaria", "regiao" ),
                      `mesorregioes` = c( "UF", "regiao" ),
                      `microrregioes` = c( "UF", "mesorregiao", "regiao" )
-                     )
-               ),
-  parents = I( list( c(), c( "regiao" ), c( "microrregiao", "regiao-imediata" ),
-                     c( "municipio" ), c( "distrito" ), c( "UF" ),
-                     c( "regiao-intermediaria" ), c( "UF" ), c( "mesorregiao" ) 
-                     )
-               )
-  )
+                     ) ),
+  parents = I( list( c(), c( "regiao" ), c( "microrregiao", "regiao-imediata" ), c( "municipio" ), c( "distrito" ),
+                     c( "UF" ), c( "regiao-intermediaria" ), c( "UF" ), c( "mesorregiao" ) ) )
+)
 
-ibge_loc_types <- c( "regiao", "UF", "municipio", "distrito",
-                     "subdistrito", "regiao-intermediaria", "regiao-imediata",
+ibge_loc_types <- c( "regiao", "UF", "municipio", "distrito", "subdistrito", "regiao-intermediaria", "regiao-imediata",
                      "mesorregiao", "microrregiao" )
 
 
@@ -75,8 +56,7 @@ loadIBGEDTB <- function( path = ibge_dtb_url )
   httr::GET( path, httr::write_disk( tmpzip ) )
   unzip( tmpzip, ibge_dtb_file, exdir = tempdir() )
   
-  return ( readxl::read_excel( file.path( tempdir(), ibge_dtb_file ),
-                              col_names = TRUE ) )
+  return ( readxl::read_excel( file.path( tempdir(), ibge_dtb_file ), col_names = TRUE ) )
 }
 
 # Download and import the RMs file
@@ -153,8 +133,7 @@ getRegionMembership <- function( rm_data = NULL )
   regions <- rm_data %>% dplyr::distinct( COD_UF, GRANDE_REG ) %>% 
     # AC (12) and MS (50) do not appear in any RMs, need to add manually
     dplyr::bind_rows(
-      data.frame( COD_UF = c( 12, 50 ),
-                  GRANDE_REG = c( "Norte", "Centro-Oeste" ) ) ) %>% 
+      data.frame( COD_UF = c( 12, 50 ), GRANDE_REG = c( "Norte", "Centro-Oeste" ) ) ) %>% 
     dplyr::arrange( COD_UF )
 
   return ( with( regions, setNames( GRANDE_REG, COD_UF ) ) )
@@ -170,8 +149,7 @@ getStateAbbr <- function( rm_data = NULL )
 
   abbr <- rm_data %>% dplyr::distinct( COD_UF, SIGLA_UF ) %>% 
     # AC (12) and MS (50) do not appear in any RMs, need to add manually
-    dplyr::bind_rows( data.frame( COD_UF = c( 12, 50 ),
-                                  SIGLA_UF = c( "AC", "MS" ) ) ) %>% 
+    dplyr::bind_rows( data.frame( COD_UF = c( 12, 50 ), SIGLA_UF = c( "AC", "MS" ) ) ) %>% 
     dplyr::filter( !is.na( SIGLA_UF ) ) %>% dplyr::arrange( COD_UF )
 
   return ( with( abbr, setNames( SIGLA_UF, COD_UF ) ) )
@@ -193,8 +171,7 @@ addRMtoDTB <- function( rm_data = NULL, dtb_data = NULL )
     as.integer( dtb_data$`Código Município Completo` )
   
   full_data <- dtb_data %>%
-    dplyr::left_join( rm_data,
-                      by = c( `Código Município Completo` = "COD_MUN" ) )
+    dplyr::left_join( rm_data, by = c( `Código Município Completo` = "COD_MUN" ) )
 
   # After the join, cities not belonging to any RM are also not assigned
   # to a region (GRANDE_REG), this uses UF from DTB to assign
@@ -214,38 +191,26 @@ getCities <- function( dtb_data = NULL, rm_data = NULL, drb_data = NULL )
   flatCities <- flatCities %>%
     # Rename vars to keep with convention, and cast numbers to integer
     dplyr::mutate( `Região` = RID, `Nome_Região` = GRANDE_REG,
-                   `Região Metropolitana` = RMID,
-                   `Nome_Região Metropolitana` = NOME,
+                   `Região Metropolitana` = RMID, `Nome_Região Metropolitana` = NOME,
                    `Tipo_Região Metropolitana` = TIPO,
                    # Meso and macro regions numbers restart for each UF
                    # Prefix those with the UF code to differentiate
-                   `Microrregião Geográfica` =
-                     as.integer( paste0( UF, `Microrregião Geográfica` ) ),
-                   `Mesorregião Geográfica` =
-                     as.integer( paste0( UF, `Mesorregião Geográfica` ) ),
-                   UF = as.integer( UF ),
-                   Sigla_UF = unname( abbrs[ as.character( UF ) ] ),
-                   `Região Geográfica Intermediária` =
-                     as.integer( `Região Geográfica Intermediária` ),
-                   `Região Geográfica Imediata` =
-                     as.integer( `Região Geográfica Imediata` ),
+                   `Microrregião Geográfica` = as.integer( paste0( UF, `Microrregião Geográfica` ) ),
+                   `Mesorregião Geográfica` = as.integer( paste0( UF, `Mesorregião Geográfica` ) ),
+                   UF = as.integer( UF ), Sigla_UF = unname( abbrs[ as.character( UF ) ] ),
+                   `Região Geográfica Intermediária` = as.integer( `Região Geográfica Intermediária` ),
+                   `Região Geográfica Imediata` = as.integer( `Região Geográfica Imediata` ),
                    `Município` = `Código Município Completo`,
-                   `Nome_Região Geográfica Intermediária` =
-                     `Nome Região Geográfica Intermediária`,
-                   `Nome_Região Geográfica Imediata` =
-                     `Nome Região Geográfica Imediata`,
+                   `Nome_Região Geográfica Intermediária` = `Nome Região Geográfica Intermediária`,
+                   `Nome_Região Geográfica Imediata` = `Nome Região Geográfica Imediata`,
                    `Nome_Mesorregião Geográfica` = `Nome_Mesorregião`,
                    `Nome_Microrregião Geográfica` = `Nome_Microrregião` ) %>%
     # Drop unused columns
-    dplyr::select( `Município`, `Nome_Município`, `Microrregião Geográfica`,
-                   `Nome_Microrregião Geográfica`, `Mesorregião Geográfica`,
-                   `Nome_Mesorregião Geográfica`, `Região Geográfica Imediata`,
-                   `Nome_Região Geográfica Imediata`,
-                   `Região Geográfica Intermediária`,
-                   `Nome_Região Geográfica Intermediária`,
-                   `Região Metropolitana`, `Nome_Região Metropolitana`,
-                   `Tipo_Região Metropolitana`, `UF`, `Nome_UF`, Sigla_UF,
-                   `Região`, `Nome_Região` )
+    dplyr::select( `Município`, `Nome_Município`, `Microrregião Geográfica`, `Nome_Microrregião Geográfica`,
+                   `Mesorregião Geográfica`, `Nome_Mesorregião Geográfica`, `Região Geográfica Imediata`,
+                   `Nome_Região Geográfica Imediata`, `Região Geográfica Intermediária`,
+                   `Nome_Região Geográfica Intermediária`, `Região Metropolitana`, `Nome_Região Metropolitana`,
+                   `Tipo_Região Metropolitana`, `UF`, `Nome_UF`, Sigla_UF, `Região`, `Nome_Região` )
   
   return ( flatCities )
 }
@@ -256,36 +221,37 @@ ibgeLocTypeID <- function( name )
 
 # Shortcuts for getLocalidade
 # Retrieve selected or all locations of a given type
-getCity <- function( id = NULL, filter = NULL )
+getMunicipio <- function( id = NULL, filter = NULL )
 { return( getLocation( "municipio", id, filter ) ) }
 
-getMicroregion <- function( id = NULL, filter = NULL )
+getMicrorregiao <- function( id = NULL, filter = NULL )
 { return( getLocation( "microrregiao", id, filter ) ) }
 
-getMesoregion <- function( id = NULL, filter = NULL )
+getMesorregiao <- function( id = NULL, filter = NULL )
 { return( getLocation( "mesorregiao", id, filter ) ) }
 
-getImmediate <- function( id = NULL, filter = NULL )
+getRegiaoImediata <- function( id = NULL, filter = NULL )
 { return( getLocation( "regiao-imediata", id, filter ) ) }
 
-getIntermediate <- function( id = NULL, filter = NULL )
+getRegiaoIntermediaria <- function( id = NULL, filter = NULL )
 { return( getLocation( "regiao-intermediaria", id, filter ) ) }
 
-getState <- function( id = NULL, filter = NULL )
+getEstado <- function( id = NULL, filter = NULL )
 { return( getLocation( "UF", id, filter ) ) }
 
-getRegion <- function( id = NULL, filter = NULL )
+getRegiao <- function( id = NULL, filter = NULL )
 { return( getLocation( "regiao", id, filter ) ) }
 
-getDistrict <- function( id = NULL, filter = NULL )
+getDistrito <- function( id = NULL, filter = NULL )
 { return( getLocation( "distrito", id, filter ) ) }
 
-getSubdistrict <- function( id = NULL, filter = NULL )
+getSubdistrito <- function( id = NULL, filter = NULL )
 { return( getLocation( "regiao-intermediaria", id, filter ) ) }
 
-getLocation <- function( type = ibge_loc_types, id = NULL, filter = NULL )
+# TODO: Allow for recursing in params
+getLocalidade <- function( type = ibge_loc_types, id = NULL, filter = NULL, recurse = 0 )
 {
-  return( parseLocalidade( queryLocalidade( match.arg( type ), id, filter ) ) )
+  return( parseAPIResult( queryLocalidade( type, id, filter ), recurse ) )
 }
 
 # Generic retrieval using the Localidade API
@@ -341,31 +307,44 @@ parseColName <- function( name, type = ibge_loc_types )
   return( parsed )
 }
 
-# Transform api results list into DF with all direct result columns, and only
-# direct-relation IDs, and rename columns
-parseLocalidade <- function( api_result )
+parseAPIResult <- function( api_result, recurse = 0 )
 {
   stopifnot( class( api_result ) == "ibge_localidade_api" )
 
-  # Shortcut for base (direct results) column indexes
-  colIDs <- ibgeLocTypeID( names( api_result$content ) )
-  
-  # Separate direct results and name them
-  base <- api_result$content[ is.na( colIDs ) ]
-  names( base ) = sapply( names( base ),
-                          function( x ) { parseColName( x, api_result$type ) } )
+  return( parseLocalidade( api_result$content, api_result$type, recurse ) )
+}
 
-  # Check if need to work on related (parent locations) results
-  if( any( !is.na( colIDs ) ) )
+# Transform api results list into a data.frame with renamed columns
+# If recursive, parse parent localities
+# Heavily based on jsonlite::flatten by Jeroen Ooms
+parseLocalidade <- function( content, type = ibge_loc_types, recurse = 0 )
+{
+  type <- match.arg( type )
+
+  parents <- vapply( content, is.list, logical( 1 ) )
+  nr <- nrow( content )
+  parsed <- content[ !parents ]
+  names( parsed ) = vapply( names( parsed ), parseColName, character( 1 ), type )
+  
+  if( any( parents ) )
   {
-    #Retrieve relation IDs from within nested DFs, and rename
-    rels <- data.frame(
-      sapply( api_result$content[ !is.na( colIDs ) ], '[[', "id" ) )
-    names( rels ) = sapply( names( api_result$content )[ !is.na( colIDs ) ],
-        function( x ) { parseColName( x, api_result$type ) }
-      )
-    base <- cbind( base, rels )
+    if( recurse > 0 )
+    {
+      parsed_parents <-
+        do.call( c, mapply( parseLocalidade, content[ parents ], names( content[ parents ] ),
+                            MoreArgs = list( recurse = recurse - 1 ), SIMPLIFY = FALSE, USE.NAMES = FALSE ) )
+    }
+    else
+    {
+      parsed_parents <- lapply( content[ parents ], '[[', 'id' )
+      names( parsed_parents ) = vapply( names( parsed_parents ), parseColName, character( 1 ), type )
+    }
+
+    parsed <- c( parsed, parsed_parents )
   }
 
-  return( base )
+  class( parsed ) <- "data.frame"
+  row.names( parsed ) <- if( is.null( nr ) ) 1 else 1:nr
+  parsed <- parsed[ , !duplicated( colnames( parsed ), fromLast = TRUE ) ]
+  return( parsed )
 }

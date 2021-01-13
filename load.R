@@ -230,16 +230,17 @@ highlights_week_cutoff <- 5L
 highlights_count <- 10L
 countries_initial_deaths_cutoff <- 50L
 
-load_BrasilIo <- function( url = dBrazilUrl )
-{ fread( url, encoding = "UTF-8" ) }
+loadBrasilIO <- function( url = dBrazilUrl )
+{ data.table::fread( url, encoding = "UTF-8" ) }
 
 load_JHUGSSEGlobal <- function( url = dGlobalUrl )
 {
-  temp <- fread( url )
+  temp <- data.table::fread( url )
   temp %>%
     pivot_longer( -(1:4), names_to = "date", values_to = "total",
                   names_transform = list( date = mdy ) ) %>%
-    group_by( date, `Country/Region` ) %>% summarise( total = sum( total ) ) %>% ungroup() %>% 
+    group_by( date, `Country/Region` ) %>% summarise( total = sum( total ) ) %>%
+    ungroup() %>% 
     rename( location = `Country/Region` ) %>% 
     group_by( location ) %>% 
     mutate( day = as.integer( total - lag( total, default = 0 ) ),
@@ -262,16 +263,16 @@ find_PRUrl <- function( homePRUrl = dHomePRUrl )
   
 }
 
-calc_SubArea <- function( data, name, locs )
+calc_SubArea <- function( data, name, locs, prefix )
 {
   data %>% filter( location %in% locs ) %>%
     group_by( date ) %>% 
-    summarise( location = paste0( prefix_metros, name ), total = sum( total ) )
+    summarise( location = paste0( prefix, name ), total = sum( total ) )
 }
 
-calcAll_SubAreas <- function( data, areas )
+calcAll_SubAreas <- function( data, areas, prefix )
 {
-  map2_dfr( names( areas ), areas, calc_SubArea, data = data )
+  map2_dfr( names( areas ), areas, calc_SubArea, data = data, prefix = prefix )
 }
 
 isRM <- function( loc )
@@ -279,15 +280,19 @@ isRM <- function( loc )
   substring( loc, 1, nchar( prefix_metros ) ) == prefix_metros
 }
 
-dBrazil <- load_BrasilIo()
-
-BRStats <- dBrazil %>% 
-  rename( total = last_available_deaths ) %>% 
-  filter( total > 0 ) %>% 
-  mutate( location = if_else( place_type == "state", state,
-                              paste( city, state, sep = " - " ) ) ) %>%
-  select( date, location, total )
-
+parseDeathsBrasilIO <- function( data = loadBrasilIO() )
+{
+  # TODO: Replace location with city_ibge_code, except where is.na
+  # In that case give a state-specific new code (XX99999?)
+  states <- getState()
+  BRStats <- data %>%
+    rename( total = last_available_deaths ) %>% 
+    filter( total > 0 ) %>% 
+    mutate( location = if_else( is.na( city_ibge_code ), state,
+                                paste( city, state, sep = " - " ) ) ) %>%
+    select( date, location, total )
+}
+  
 BRSummary <- dBrazil %>% 
   rename( total = last_available_deaths ) %>% 
   filter( total > 0, place_type == "state" ) %>%
@@ -295,7 +300,7 @@ BRSummary <- dBrazil %>%
   summarise( location = "Brasil", total = sum( total ) ) %>% 
   ungroup()
 
-BRMetros <- calcAll_SubAreas( BRStats, metroareas )
+BRMetros <- calcAll_SubAreas( BRStats, metroareas, prefix_metros )
   
 BRStats <- bind_rows( BRStats, BRSummary, BRMetros ) %>%
   mutate( date = ymd( date ) ) %>% 
