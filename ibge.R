@@ -1,3 +1,5 @@
+# TODO: Turn into package, remove this sourcing flag, update user agent
+ibge_R <- TRUE
 agent <- httr::user_agent( "https://github.com/mauexemplo/COVID19" )
 
 ibge_rms_url <-
@@ -222,37 +224,34 @@ ibgeLocTypeID <- function( name )
 # Shortcuts for getLocalidade
 # Retrieve selected or all locations of a given type
 getMunicipio <- function( id = NULL, filter = NULL )
-{ return( getLocation( "municipio", id, filter ) ) }
+{ return( getLocalidade( "municipio", id, filter ) ) }
 
 getMicrorregiao <- function( id = NULL, filter = NULL )
-{ return( getLocation( "microrregiao", id, filter ) ) }
+{ return( getLocalidade( "microrregiao", id, filter ) ) }
 
 getMesorregiao <- function( id = NULL, filter = NULL )
-{ return( getLocation( "mesorregiao", id, filter ) ) }
+{ return( getLocalidade( "mesorregiao", id, filter ) ) }
 
 getRegiaoImediata <- function( id = NULL, filter = NULL )
-{ return( getLocation( "regiao-imediata", id, filter ) ) }
+{ return( getLocalidade( "regiao-imediata", id, filter ) ) }
 
 getRegiaoIntermediaria <- function( id = NULL, filter = NULL )
-{ return( getLocation( "regiao-intermediaria", id, filter ) ) }
+{ return( getLocalidade( "regiao-intermediaria", id, filter ) ) }
 
 getEstado <- function( id = NULL, filter = NULL )
-{ return( getLocation( "UF", id, filter ) ) }
+{ return( getLocalidade( "UF", id, filter ) ) }
 
 getRegiao <- function( id = NULL, filter = NULL )
-{ return( getLocation( "regiao", id, filter ) ) }
+{ return( getLocalidade( "regiao", id, filter ) ) }
 
 getDistrito <- function( id = NULL, filter = NULL )
-{ return( getLocation( "distrito", id, filter ) ) }
+{ return( getLocalidade( "distrito", id, filter ) ) }
 
 getSubdistrito <- function( id = NULL, filter = NULL )
-{ return( getLocation( "regiao-intermediaria", id, filter ) ) }
+{ return( getLocalidade( "regiao-intermediaria", id, filter ) ) }
 
-# TODO: Allow for recursing in params
 getLocalidade <- function( type = ibge_loc_types, id = NULL, filter = NULL, recurse = 0 )
-{
-  return( parseAPIResult( queryLocalidade( type, id, filter ), recurse ) )
-}
+{ return( parseAPIResult( queryLocalidade( type, id, filter ), recurse ) ) }
 
 # Generic retrieval using the Localidade API
 queryLocalidade <- function( type = ibge_loc_types, id = NULL, filter = NULL )

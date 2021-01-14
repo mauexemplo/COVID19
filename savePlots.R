@@ -4,8 +4,7 @@ require( purrr )
 require( lubridate )
 require( stringr )
 
-if ( !exists( "BRStats" ) ||
-     today() - max( BRStats$date ) > days( 1 ) )
+if ( !exists( "load_R" ) )
 {
   source( "load.R", encoding = "UTF-8" )
 }

@@ -5,6 +5,11 @@ require( tidyr )
 require( dplyr )
 require( purrr )
 
+# TODO: require() ibge once packaged
+if( !exists( "ibge_R" ) ) source( "ibge.R" )
+load_R <- TRUE
+
+
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
 dPRUrl <- NULL
@@ -280,17 +285,27 @@ isRM <- function( loc )
   substring( loc, 1, nchar( prefix_metros ) ) == prefix_metros
 }
 
-parseDeathsBrasilIO <- function( data = loadBrasilIO() )
+parseCityDeathsBrasilIO <- function( data = loadBrasilIO() )
 {
-  # TODO: Replace location with city_ibge_code, except where is.na
-  # In that case give a state-specific new code (XX99999?)
-  states <- getState()
-  BRStats <- data %>%
-    rename( total = last_available_deaths ) %>% 
-    filter( total > 0 ) %>% 
-    mutate( location = if_else( is.na( city_ibge_code ), state,
-                                paste( city, state, sep = " - " ) ) ) %>%
-    select( date, location, total )
+  nacodes <- getEstado() %>% dplyr::mutate( nacode = as.integer( paste0( UF, "99999" ) ) ) %>%
+    { setNames( .$nacode, .$Sigla_UF ) }
+  data %<>% dplyr::filter( last_available_deaths > 0, place_type == "city" ) %>% 
+    dplyr::mutate( location = unname( dplyr::if_else( is.na( city_ibge_code ), nacodes[ state ], city_ibge_code ) ),
+                   date = lubridate::ymd( date ) ) %>%
+    dplyr::select( date, location, total = last_available_deaths )
+  
+  return( data )
+}
+
+calcStats <- function( data = parseCityDeathsBrasilIO() )
+{
+  data %<>% dplyr::arrange( location, date ) %>% dplyr::group_by( location ) %>%
+    dplyr::mutate( day = as.integer( total - lag( total, default = 0 ) ),
+                   week = as.integer( total - lag( total, n = 7, default = 0 ) ),
+                   day_m7 = frollmean( day, 7 ),
+                   growth_7 = 1 - ( lag( week, n = 7 ) / week ) ) %>%
+    dplyr::ungroup()
+  return( data )
 }
   
 BRSummary <- dBrazil %>% 
