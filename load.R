@@ -307,6 +307,20 @@ calcStats <- function( data = parseCityDeathsBrasilIO() )
     dplyr::ungroup()
   return( data )
 }
+
+addIBGELocalidade <- function( data = parseCityDeathsBrasilIO() )
+{
+  if( !exists( "ibge_R" ) ) source( "ibge.R" )
+
+  ibgedata <- getLocalidade( "municipio", recurse = 9 )
+  ibgedata %<>% dplyr::distinct( UF, Sigla_UF, Nome_UF, Região, Sigla_Região, Nome_Região ) %>%
+    dplyr::mutate( Município = as.integer( paste0( UF, "99999" ) ), Nome_Município = "Importados / Indefinidos") %>%
+    dplyr::bind_rows( ibgedata ) %>% dplyr::arrange( Município )
+
+  result <- dplyr::left_join( data, ibgedata, by = c( "location" = "Município" ) ) %>%
+    dplyr::select( date, total, Município = location, Nome_Município:`Nome_Região Intermediária`, UF:Nome_Região )
+  return( result )
+}
   
 BRSummary <- dBrazil %>% 
   rename( total = last_available_deaths ) %>% 
