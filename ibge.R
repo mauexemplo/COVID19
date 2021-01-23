@@ -298,10 +298,10 @@ parseColName <- function( name, type = ibge_loc_types )
   type <- match.arg( type )
   type_name <- ibge_api_endpoints[ ibgeLocTypeID( type ), "name" ]
   parsed <- switch( name,
-    "id" = type_name,
+    "id" = as.character( type_name ),
     "nome" = paste0( "Nome_", type_name ),
     "sigla" = paste0( "Sigla_", type_name ),
-    ibge_api_endpoints[ ibgeLocTypeID( name ), "name" ]
+    as.character( ibge_api_endpoints[ ibgeLocTypeID( name ), "name" ] )
   )
   return( parsed )
 }
