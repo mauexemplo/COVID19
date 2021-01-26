@@ -6,7 +6,7 @@ require( dplyr )
 require( purrr )
 
 # TODO: require() ibge once packaged
-if( !exists( "ibge_R" ) ) source( "ibge.R" )
+if( !exists( "ibge_R" ) ) source( "ibge.R", encoding = "UTF-8" )
 load_R <- TRUE
 
 
@@ -234,6 +234,7 @@ prefix_metros <- "RM "
 highlights_week_cutoff <- 5L
 highlights_count <- 10L
 countries_initial_deaths_cutoff <- 50L
+default_aggregations <- c( "regioes", "estados", "regioes-imediatas", "microrregioes" )
 
 loadBrasilIO <- function( url = dBrazilUrl )
 { data.table::fread( url, encoding = "UTF-8" ) }
@@ -310,7 +311,7 @@ calcStats <- function( data = parseCityDeathsBrasilIO() )
 
 addIBGELocalidade <- function( data = parseCityDeathsBrasilIO() )
 {
-  if( !exists( "ibge_R" ) ) source( "ibge.R" )
+  if( !exists( "ibge_R" ) ) source( "ibge.R", encoding = "UTF-8" )
 
   ibgedata <- getLocalidade( "municipio", recurse = 9 )
   ibgedata %<>% dplyr::distinct( UF, Sigla_UF, Nome_UF, Região, Sigla_Região, Nome_Região ) %>%
@@ -320,6 +321,15 @@ addIBGELocalidade <- function( data = parseCityDeathsBrasilIO() )
   result <- dplyr::left_join( data, ibgedata, by = c( "location" = "Município" ) ) %>%
     dplyr::select( date, total, Município = location, Nome_Município:`Nome_Região Intermediária`, UF:Nome_Região )
   return( result )
+}
+
+calcAggregate <- function( data = addIBGELocalidade(), group_by = default_aggregations )
+{
+  agg_forms <- paste0( "total ~ date + `", ibge_api_endpoints[ group_by, "name" ], "`" )
+  col_names <- c( "date", "location", "total" )
+  agg_l <- lapply( agg_forms, function( x ){ setNames( aggregate( as.formula( x ), data, sum ), col_names ) } )
+  agg <- data.table::rbindlist( agg_l )
+  return( agg )
 }
   
 BRSummary <- dBrazil %>% 
