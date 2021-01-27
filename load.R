@@ -234,7 +234,7 @@ prefix_metros <- "RM "
 highlights_week_cutoff <- 5L
 highlights_count <- 10L
 countries_initial_deaths_cutoff <- 50L
-default_aggregations <- c( "regioes", "estados", "regioes-imediatas", "microrregioes" )
+default_aggregations <- c( "regioes", "estados", "regioes-imediatas", "regioes-intermediarias" )
 
 loadBrasilIO <- function( url = dBrazilUrl )
 { data.table::fread( url, encoding = "UTF-8" ) }
@@ -255,16 +255,27 @@ load_JHUGSSEGlobal <- function( url = dGlobalUrl )
     filter( total > countries_initial_deaths_cutoff )
 }
 
-load_PR <- function( url = dPRUrl )
+loadPR <- function( url = findPRUrl() )
+{ return( data.table::fread( url, encoding = "UTF-8" ) ) }
+
+parsePR <- function( data = loadPR() )
 {
-  if( is.null( url ) )
-  {
-    url <- find_PRUrl()
-  }
-  
+  parsed <- data %>% dplyr::transmute( date = lubridate::dmy( DATA_OBITO ), location = IBGE_RES_PR ) %>% 
+    dplyr::filter( !is.na( date ), location != 9999999 ) %>%
+    dplyr::group_by( date, location ) %>% dplyr::summarise( total = n() ) %>%
+    dplyr::group_by( location ) %>% dplyr::mutate( total = cumsum( total ) ) %>% 
+    dplyr::ungroup()
+  return( parsed )
 }
 
-find_PRUrl <- function( homePRUrl = dHomePRUrl )
+mergePRtoBrasilIO <- function( bio = parseCityDeathsBrasilIO(), pr = loadPR() )
+{
+  return( dplyr::bind_rows( filter( bio, substr( location, 1, 2 ) != "41" ), pr ) )
+}
+
+
+
+findPRUrl <- function( homePRUrl = dHomePRUrl )
 {
   
 }
@@ -311,8 +322,6 @@ calcStats <- function( data = parseCityDeathsBrasilIO() )
 
 addIBGELocalidade <- function( data = parseCityDeathsBrasilIO() )
 {
-  if( !exists( "ibge_R" ) ) source( "ibge.R", encoding = "UTF-8" )
-
   ibgedata <- getLocalidade( "municipio", recurse = 9 )
   ibgedata %<>% dplyr::distinct( UF, Sigla_UF, Nome_UF, Região, Sigla_Região, Nome_Região ) %>%
     dplyr::mutate( Município = as.integer( paste0( UF, "99999" ) ), Nome_Município = "Importados / Indefinidos") %>%

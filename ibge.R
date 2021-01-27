@@ -39,7 +39,7 @@ ibge_api_endpoints <- data.frame(
                      `mesorregioes` = c( "UF", "regiao" ),
                      `microrregioes` = c( "UF", "mesorregiao", "regiao" )
                      ) ),
-  parents = I( list( c(), c( "regiao" ), c( "microrregiao", "regiao-imediata" ), c( "municipio" ), c( "distrito" ),
+  parents = I( list( NULL, c( "regiao" ), c( "microrregiao", "regiao-imediata" ), c( "municipio" ), c( "distrito" ),
                      c( "UF" ), c( "regiao-intermediaria" ), c( "UF" ), c( "mesorregiao" ) ) )
 )
 
@@ -346,4 +346,15 @@ parseLocalidade <- function( content, type = ibge_loc_types, recurse = 0 )
   row.names( parsed ) <- if( is.null( nr ) ) 1 else 1:nr
   parsed <- parsed[ , !duplicated( colnames( parsed ), fromLast = TRUE ) ]
   return( parsed )
+}
+
+getSimpleNames <- function()
+{
+  imeds <- getLocalidade( "regiao-imediata", recurse = 9 ) %>%
+    transmute( id = `Região Imediata`, name = paste( "RGI", `Nome_Região Imediata`, "-", Sigla_UF ) )
+  ints <- getLocalidade( "regiao-intermediaria", recurse = 9 ) %>%
+    transmute( id = `Região Intermediária`, name = paste( "RGInt", `Nome_Região Intermediária`, "-", Sigla_UF ) )
+  ufs <- setNames( getEstado()[ , c( "UF", "Nome_UF" ) ], c( "id", "name" ) )
+  regs <- getRegiao() %>% transmute( id = `Região`, name = paste( "Região", `Sigla_Região` ) )
+  return( rbind( imeds, ints, ufs, regs ) )
 }
