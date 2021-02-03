@@ -9,10 +9,10 @@ require( purrr )
 if( !exists( "ibge_R" ) ) source( "ibge.R", encoding = "UTF-8" )
 load_R <- TRUE
 
+httr::set_config( httr::user_agent( "https://github.com/mauexemplo/COVID19" ) )
 
 dGlobalUrl <- "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 dBrazilUrl <- "https://data.brasil.io/dataset/covid19/caso_full.csv.gz"
-dPRUrl <- NULL
 dHomePRUrl <- "https://www.saude.pr.gov.br/Pagina/Coronavirus-COVID-19"
 
 cities <- c( `Belo Horizonte - MG` = "3106200", `Brasília - DF` = "5300108",
@@ -264,20 +264,21 @@ parsePR <- function( data = loadPR() )
     dplyr::filter( !is.na( date ), location != 9999999 ) %>%
     dplyr::group_by( date, location ) %>% dplyr::summarise( total = n() ) %>%
     dplyr::group_by( location ) %>% dplyr::mutate( total = cumsum( total ) ) %>% 
+    dplyr::ungroup() %>% dplyr::arrange( location, date ) %>% 
+    dplyr::group_by( location ) %>%
+    tidyr::complete( date = seq.Date( min( date ), today(), by = "day" ) ) %>% tidyr::fill( total ) %>% 
     dplyr::ungroup()
   return( parsed )
 }
 
 mergePRtoBrasilIO <- function( bio = parseCityDeathsBrasilIO(), pr = loadPR() )
 {
-  return( dplyr::bind_rows( filter( bio, substr( location, 1, 2 ) != "41" ), pr ) )
+  return( bio %>% dplyr::filter( !grepl( "^41", location ) ) %>% dplyr::bind_rows( pr ) )
 }
-
-
 
 findPRUrl <- function( homePRUrl = dHomePRUrl )
 {
-  
+  return( xml2::read_html( homePRUrl ) %>% rvest::html_node( "[title=Geral] a" ) %>% rvest::html_attr( "href" ) )
 }
 
 calc_SubArea <- function( data, name, locs, prefix )
