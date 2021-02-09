@@ -276,10 +276,10 @@ queryLocalidade <- function( type = ibge_loc_types, id = NULL, filter = NULL )
 
   resp <- httr::GET( url, agent )
 
-  if( httr::http_type( resp ) != "application/json" )
+  if( httr::status_code( resp ) != 200 )
+  { stop( paste0( "getLocalidade: IBGE API request failed (", httr::status_code( resp ), "), URL: ", url ) ) }
+  else if( httr::http_type( resp ) != "application/json" )
   { stop( paste0( "getLocalidade: IBGE API response not JSON, URL: ", url ) ) }
-  else if( httr::status_code( resp ) != 200 )
-  { stop( paste0( "getLocalidade: IBGE API request failed, URL: ", url ) ) }
   
   parsed <- jsonlite::fromJSON( httr::content( resp, "text" ) )
 
@@ -350,11 +350,17 @@ parseLocalidade <- function( content, type = ibge_loc_types, recurse = 0 )
 
 getSimpleNames <- function()
 {
+  cids <- setNames( getMunicipio()[ , c( "Município", "Nome_Município" ) ], c( "id", "name" ) )
   imeds <- getLocalidade( "regiao-imediata", recurse = 9 ) %>%
     transmute( id = `Região Imediata`, name = paste( "RGI", `Nome_Região Imediata`, "-", Sigla_UF ) )
   ints <- getLocalidade( "regiao-intermediaria", recurse = 9 ) %>%
     transmute( id = `Região Intermediária`, name = paste( "RGInt", `Nome_Região Intermediária`, "-", Sigla_UF ) )
   ufs <- setNames( getEstado()[ , c( "UF", "Nome_UF" ) ], c( "id", "name" ) )
   regs <- getRegiao() %>% transmute( id = `Região`, name = paste( "Região", `Sigla_Região` ) )
-  return( rbind( imeds, ints, ufs, regs ) )
+  return( rbind( cids, imeds, ints, ufs, regs ) )
+}
+
+getParents <- function( id, type = c( "rg", "mm" ) )
+{
+  
 }

@@ -1,13 +1,13 @@
+# TODO: require() ibge once packaged
+if( !exists( "ibge_R" ) ) source( "ibge.R", encoding = "UTF-8" )
+load_R <- TRUE
+
 require( data.table )
 require( curl )
 require( lubridate )
 require( tidyr )
 require( dplyr )
 require( purrr )
-
-# TODO: require() ibge once packaged
-if( !exists( "ibge_R" ) ) source( "ibge.R", encoding = "UTF-8" )
-load_R <- TRUE
 
 httr::set_config( httr::user_agent( "https://github.com/mauexemplo/COVID19" ) )
 
@@ -262,7 +262,7 @@ parsePR <- function( data = loadPR() )
 {
   parsed <- data %>% dplyr::transmute( date = lubridate::dmy( DATA_OBITO ), location = IBGE_RES_PR ) %>% 
     dplyr::filter( !is.na( date ), location != 9999999 ) %>%
-    dplyr::group_by( date, location ) %>% dplyr::summarise( total = n() ) %>%
+    dplyr::group_by( date, location ) %>% dplyr::summarise( total = dplyr::n() ) %>%
     dplyr::group_by( location ) %>% dplyr::mutate( total = cumsum( total ) ) %>% 
     dplyr::ungroup() %>% dplyr::arrange( location, date ) %>% 
     dplyr::group_by( location ) %>%
@@ -271,7 +271,7 @@ parsePR <- function( data = loadPR() )
   return( parsed )
 }
 
-mergePRtoBrasilIO <- function( bio = parseCityDeathsBrasilIO(), pr = loadPR() )
+mergePRtoBrasilIO <- function( bio = parseCityDeathsBrasilIO(), pr = parsePR() )
 {
   return( bio %>% dplyr::filter( !grepl( "^41", location ) ) %>% dplyr::bind_rows( pr ) )
 }
@@ -315,8 +315,11 @@ calcStats <- function( data = parseCityDeathsBrasilIO() )
   data %<>% dplyr::arrange( location, date ) %>% dplyr::group_by( location ) %>%
     dplyr::mutate( day = as.integer( total - lag( total, default = 0 ) ),
                    week = as.integer( total - lag( total, n = 7, default = 0 ) ),
-                   day_m7 = frollmean( day, 7 ),
-                   growth_7 = 1 - ( lag( week, n = 7 ) / week ) ) %>%
+                   days15 = as.integer( total - lag( total, n = 15, default = 0 ) ),
+                   day_m7 = data.table::frollmean( day, 7 ),
+                   day_m15 = data.table::frollmean( day, 15 ),
+                   growth_7 = 1 - ( lag( week, n = 7 ) / week ),
+                   growth_15 = 1 - ( lag( days15, n = 15 ) / days15 ) ) %>%
     dplyr::ungroup()
   return( data )
 }

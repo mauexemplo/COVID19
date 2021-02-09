@@ -1,68 +1,81 @@
+if ( !exists( "load_R" ) ) source( "load.R", encoding = "UTF-8" )
+
 require( ggplot2 )
 require( svglite )
 require( purrr )
 require( lubridate )
 require( stringr )
 
-if ( !exists( "load_R" ) )
-{
-  source( "load.R", encoding = "UTF-8" )
-}
-
 plotFolder <- "plots"
-lastUpdate <- format( now(), "%d/%m/%Y %H:%M" )
-plotCaption <- paste( "Fonte: Brasil.IO - ", lastUpdate )
-JHUCaption <- paste( "Fonte: JHU GSSE no GitHub - ", lastUpdate )
+lastUpdate <- format( Sys.time(), "%d/%m/%Y %H:%M" )
+plotCaption <- paste( "Fonte: Brasil.IO -", lastUpdate )
+JHUCaption <- paste( "Fonte: JHU GSSE no GitHub -", lastUpdate )
 defaultPlotFileFormat <- "png"
 
 plot_GL7 <- function( data, loc_name, ... )
 {
-  ggplot( data, mapping = aes( x = total, y = week ) ) +
-    geom_line() +
-    geom_smooth( span = 0.5 ) +
-    scale_x_log10( "Total (log)",
+  ggplot2::ggplot( data, mapping = ggplot2::aes( x = total, y = week ) ) +
+    ggplot2::geom_line() +
+    ggplot2::geom_smooth( span = 0.5 ) +
+    ggplot2::scale_x_log10( "Total (log)",
                    breaks = c( 10, 100, 1000, 10000, 100000 ),
                    labels = c( "10", "100", "1k", "10k", "100k" )
     ) +
-    scale_y_log10( "Acumulado 7 dias (log)",
+    ggplot2::scale_y_log10( "Acumulado 7 dias (log)",
                    breaks = c( 10, 100, 1000, 10000, 100000 ),
                    labels = c( "10", "100", "1k", "10k", "100k" )
     ) +
-    labs( title = paste0( loc_name, " - Taxa de crescimento" ), ... )
+    ggplot2::labs( title = paste( loc_name, "- Taxa de crescimento" ), ... )
 }
 
 plot_LocGL7 <- function( data, loc, loc_name = loc, ... )
 {
-  plot_GL7( filter( data, location == loc ), loc_name, ... )
+  plot_GL7( dplyr::filter( data, location == loc ), loc_name, ... )
 }
 
 plot_M7 <- function( data, loc_name, ... )
 {
-  ggplot( data, mapping = aes( x = date, y = day_m7 ) ) +
-    geom_line() +
-    geom_smooth( span = 0.5 ) +
-    labs( title = paste0( loc_name, " - Média móvel (7 dias)" ),
-          x = "Data", y = "Média 7 dias", ... )
+  ggplot2::ggplot( data, mapping = ggplot2::aes( x = date, y = day_m7 ) ) +
+    ggplot2::geom_line() +
+    ggplot2::geom_smooth( span = 0.5 ) +
+    ggplot2::labs( title = paste( loc_name, "- Média móvel (7 dias)" ), x = "Data", y = "Média 7 dias", ... )
 }
 
 plot_LocM7 <- function( data, loc, loc_name = loc, ... )
 {
-  plot_M7( filter( data, location == loc ), loc_name, ... )
+  plot_M7( dplyr::filter( data, location == loc ), loc_name, ... )
 }
 
-state_gl7s <- map2( states, states, plot_LocGL7, data = BRStats,
+plot_named_loc_gl7 <- function( data, loc )
+{
+  dplyr::filter( data, location %in% loc ) %>%
+    ggplot2::ggplot( mapping = ggplot2::aes( x = total, y = week, color = name ) ) +
+    ggplot2::geom_smooth( span = 0.4 ) +
+    ggplot2::scale_x_log10( "Total (log)",
+                            breaks = c( 10, 100, 1000, 10000, 100000 ),
+                            labels = c( "10", "100", "1k", "10k", "100k" )
+    ) +
+    ggplot2::scale_y_log10( "Acumulado 7 dias (log)",
+                            breaks = c( 10, 100, 1000, 10000, 100000 ),
+                            labels = c( "10", "100", "1k", "10k", "100k" )
+    ) +
+    ggplot2::labs( title = "Taxa de crescimento" )
+  
+}
+
+state_gl7s <- purrr::map2( states, states, plot_LocGL7, data = BRStats,
                     caption = plotCaption )
-state_m7s <- map2( states, states, plot_LocM7, data = BRStats,
+state_m7s <- purrr::map2( states, states, plot_LocM7, data = BRStats,
                    caption = plotCaption )
 
-city_gl7s <- map2( names( cities ), names( cities ), plot_LocGL7,
+city_gl7s <- purrr::map2( names( cities ), names( cities ), plot_LocGL7,
                    data = BRStats, caption = plotCaption )
-city_m7s <- map2( names( cities ), names( cities ), plot_LocM7,
+city_m7s <- purrr::map2( names( cities ), names( cities ), plot_LocM7,
                   data = BRStats, caption = plotCaption )
 
-country_gl7s <- map2( countries, names( countries ), plot_LocGL7,
+country_gl7s <- purrr::map2( countries, names( countries ), plot_LocGL7,
                       data = JHUStats, caption = JHUCaption )
-country_m7s <- map2( countries, names( countries ), plot_LocM7,
+country_m7s <- purrr::map2( countries, names( countries ), plot_LocM7,
                       data = JHUStats, caption = JHUCaption )
 
 sumStates_gl7 <- plot_LocGL7( BRStats, "Brasil", caption = plotCaption )
@@ -71,7 +84,7 @@ sumStates_m7 <- plot_LocM7( BRStats, "Brasil", caption = plotCaption )
 savePlot <- function( plot, file_name, formats = defaultPlotFileFormat )
 {
   plotNames <- paste( file.path( plotFolder, file_name ), formats, sep = "." )
-  map( plotNames, ggsave, plot = plot, scale = 1.5 )
+  purrr::map( plotNames, ggsave, plot = plot, scale = 1.5 )
 }
 
 multiStates_gl7 <- BRStats %>%
