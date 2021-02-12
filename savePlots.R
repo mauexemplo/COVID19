@@ -8,7 +8,7 @@ require( stringr )
 
 plotFolder <- "plots"
 lastUpdate <- format( Sys.time(), "%d/%m/%Y %H:%M" )
-plotCaption <- paste( "Fonte: Brasil.IO -", lastUpdate )
+plotCaption <- paste0( "Fontes: Brasil.IO e Secretaria da Saúde PR (em ", lastUpdate, ")" )
 JHUCaption <- paste( "Fonte: JHU GSSE no GitHub -", lastUpdate )
 defaultPlotFileFormat <- "png"
 
@@ -46,10 +46,10 @@ plot_LocM7 <- function( data, loc, loc_name = loc, ... )
   plot_M7( dplyr::filter( data, location == loc ), loc_name, ... )
 }
 
-plot_named_loc_gl7 <- function( data, loc )
+multiPlotNamedLocGL7 <- function( data, loc, title = "Taxa de Crescimento" )
 {
   dplyr::filter( data, location %in% loc ) %>%
-    ggplot2::ggplot( mapping = ggplot2::aes( x = total, y = week, color = name ) ) +
+    ggplot2::ggplot( mapping = ggplot2::aes( x = total, y = week, colour = name ) ) +
     ggplot2::geom_smooth( span = 0.4 ) +
     ggplot2::scale_x_log10( "Total (log)",
                             breaks = c( 10, 100, 1000, 10000, 100000 ),
@@ -59,7 +59,7 @@ plot_named_loc_gl7 <- function( data, loc )
                             breaks = c( 10, 100, 1000, 10000, 100000 ),
                             labels = c( "10", "100", "1k", "10k", "100k" )
     ) +
-    ggplot2::labs( title = "Taxa de crescimento" )
+    ggplot2::labs( title = title, colour = "Localidade", caption = plotCaption )
   
 }
 
@@ -84,7 +84,7 @@ sumStates_m7 <- plot_LocM7( BRStats, "Brasil", caption = plotCaption )
 savePlot <- function( plot, file_name, formats = defaultPlotFileFormat )
 {
   plotNames <- paste( file.path( plotFolder, file_name ), formats, sep = "." )
-  purrr::map( plotNames, ggsave, plot = plot, scale = 1.5 )
+  purrr::map( plotNames, ggplot2::ggsave, plot = plot, scale = 1.5 )
 }
 
 multiStates_gl7 <- BRStats %>%

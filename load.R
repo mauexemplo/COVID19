@@ -344,6 +344,16 @@ calcAggregate <- function( data = addIBGELocalidade(), group_by = default_aggreg
   agg <- data.table::rbindlist( agg_l )
   return( agg )
 }
+
+loadParsedDeaths <- function()
+{
+  bio <- parseCityDeathsBrasilIO()
+  pr <- parsePR()
+  biopr <- mergePRtoBrasilIO( bio, pr )
+  bpr_agg <- dplyr::bind_rows( biopr, calcAggregate( addIBGELocalidade( biopr ) ) )
+  deaths <- dplyr::left_join( bpr_agg, getSimpleNames(), by = c( "location" = "id" ) ) %>% calcStats()
+  return( deaths )
+}
   
 BRSummary <- dBrazil %>% 
   rename( total = last_available_deaths ) %>% 
