@@ -248,10 +248,10 @@ load_JHUGSSEGlobal <- function( url = dGlobalUrl )
     group_by( date, `Country/Region` ) %>% summarise( total = sum( total ) ) %>%
     ungroup() %>% 
     rename( location = `Country/Region` ) %>% 
-    group_by( location ) %>% 
-    mutate( day = as.integer( total - lag( total, default = 0 ) ),
-            week = as.integer( total - lag( total, n = 7, default = 0 ) ),
-            day_m7 = frollmean( day, 7 ) ) %>% 
+    # group_by( location ) %>% 
+    # mutate( day = as.integer( total - lag( total, default = 0 ) ),
+    #         week = as.integer( total - lag( total, n = 7, default = 0 ) ),
+    #         day_m7 = frollmean( day, 7 ) ) %>% 
     filter( total > countries_initial_deaths_cutoff )
 }
 

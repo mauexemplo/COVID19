@@ -248,7 +248,7 @@ getDistrito <- function( id = NULL, filter = NULL )
 { return( getLocalidade( "distrito", id, filter ) ) }
 
 getSubdistrito <- function( id = NULL, filter = NULL )
-{ return( getLocalidade( "regiao-intermediaria", id, filter ) ) }
+{ return( getLocalidade( "subdistrito", id, filter ) ) }
 
 getLocalidade <- function( type = ibge_loc_types, id = NULL, filter = NULL, recurse = 0 )
 { return( parseAPIResult( queryLocalidade( type, id, filter ), recurse ) ) }
